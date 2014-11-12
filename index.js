@@ -1,16 +1,16 @@
-var Accrete = require('./accrete.js');
+var Accrete = require('./src/Accrete.js');
 
-var gen 	= new Accrete(),
-	sys 	= gen.distributePlanets();
+var gen = new Accrete(),
+    sys = gen.distributePlanets();
 
 console.log(sys)
 
-for(var p in sys) {
-	var au 	= Math.log(sys[p].axis + 1) / Math.log(10),
-		rad = Math.pow(sys[p].getEarthMass(), 1/3);
-
-	console.log(rad * 10)
-}
+// for(var p in sys) {
+//   var au = Math.log(sys[p].axis + 1) / Math.log(10),
+//       rad = Math.pow(sys[p].getEarthMass(), 1/3);
+//
+//   console.log(rad * 10)
+// }
 
 // Planetismal curr = (Planetismal)e.nextElement();
 //             double au = log10(curr.getOrbitalAxis());
@@ -19,7 +19,7 @@ for(var p in sys) {
 //             int x0 = (int)(au * (double)hscale);
 //             int x = x0 + hscale - r;
 //             int y = vscale - r;
-//             if (curr.isGasGiant()) 
+//             if (curr.isGasGiant())
 //                 g.drawOval(x, y, 2*r, 2*r);
 //             else
 //                 g.fillOval(x, y, 2*r, 2*r);

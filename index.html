@@ -1,12 +1,13 @@
 <html>
 <head>
-	<title>ACCRETE</title>
-	<script src="accrete.js"></script>
-	<script>
-		var gen = new Accrete();
+  <title>ACCRETE</title>
+  <script src="accrete.js"></script>
+  <script>
+    var gen = new Accrete(),
+        sys = gen.distributePlanets();
 
-		gen.distributePlanets();
-	</script>
+    console.log(sys)
+  </script>
 </head>
 <body>
 

@@ -1,170 +1,179 @@
+var Astro = require('./Astro');
+var DoleParams = require('./DoleParams');
+var DustBand = require('./DustBand');
+var DustBands = require('./DustBands');
+var Planetismal = require('./Planetismal');
+
 function Accrete(stellMass, stellLum) {
-	this.stellarMass 		= stellMass || 1;
-	this.stellarLuminosity 	= stellLum  || Astro.luminosity(this.stellarMass);
-	
-	this.innerBound 		= DoleParams.innermostPlanet(this.stellarMass);
-	this.outerBound 		= DoleParams.outermostPlanet(this.stellarMass);
-	this.innerDust 			= DoleParams.innerDustLimit(this.stellarMass);
-	this.outerDust 			= DoleParams.outerDustLimit(this.stellarMass);
+  this.stellarMass = stellMass || 1;
+  this.stellarLuminosity = stellLum  || Astro.luminosity(this.stellarMass);
+
+  this.innerBound = DoleParams.innermostPlanet(this.stellarMass);
+  this.outerBound = DoleParams.outermostPlanet(this.stellarMass);
+  this.innerDust = DoleParams.innerDustLimit(this.stellarMass);
+  this.outerDust = DoleParams.outerDustLimit(this.stellarMass);
 }
 
 Accrete.prototype = Object.create({
-	criticalMass	: 0,
-	dustDensity 	: 0,
-	planetHead 		: 0,
-	dustBands		: null,
+  criticalMass: 0,
+  dustDensity: 0,
+  planetHead: 0,
+  dustBands: null,
 
-	distributePlanets: function() {
-		var dustLeft 	= true;
+  distributePlanets: function() {
+    var dustLeft = true;
 
-		this.planetHead = null;
+    this.planetHead = null;
 
-		this.dustBands = new DustBands(this.innerDust, this.outerDust);
+    this.dustBands = new DustBands(this.innerDust, this.outerDust);
 
-		while(dustLeft) {
-			var tismal = new Planetismal((Math.random() * this.outerBound) + this.innerBound, DoleParams.randomEccentricity());
-			
-			this.dustDensity 	= DoleParams.dustDensity(this.stellarMass, tismal.axis);
-			this.criticalMass 	= tismal.criticalMass(this.stellarLuminosity);
-			
-			var mass = this.accreteDust(tismal);
-			
-			if((mass != 0.0) && (mass != PROTOPLANET_MASS)) {
-			
-				if(mass >= this.criticalMass) tismal.gasGiant = true;
+    while(dustLeft) {
+      var tismal = new Planetismal((Math.random() * this.outerBound) + this.innerBound, DoleParams.randomEccentricity());
 
-				this.dustBands.updateLanes(tismal.innerSweptLimit(), tismal.outerSweptLimit(), tismal.gasGiant);
-				
-				dustLeft = this.dustBands.dustRemaining(this.innerBound, this.outerBound);
-				
-				this.dustBands.compressLanes();
-				
-				if(!this.coalescePlanetismals(tismal)) this.insertPlanet(tismal);
-			}
-		}
+      this.dustDensity = DoleParams.dustDensity(this.stellarMass, tismal.axis);
+      this.criticalMass = tismal.criticalMass(this.stellarLuminosity);
 
-		var planets = [this.planetHead],
-			curr 	= this.planetHead;
+      var mass = this.accreteDust(tismal);
 
-		while(curr = curr.next) planets.push(curr);
-			
-		return planets;
-	},
+      if((mass != 0.0) && (mass != Astro.protoplanetMass)) {
 
-	//	Planetismal : nucleus
-	accreteDust: function(nucleus) {
-		var that 	= this,
-			newMass = nucleus.mass;
+        if(mass >= this.criticalMass) tismal.gasGiant = true;
 
-		//	TODO: 	Make sure that turning the original DO/WHILE
-		//			into a while didn't affect the outcome
-		do {
-			nucleus.mass = newMass;
-			newMass = 0;
-			
-			this.dustBands.each(function(band, i) {
-				newMass += that.collectDust(nucleus, band);
-			});
-		}
-		while(newMass - nucleus.mass > 0.0001 * nucleus.mass);
+        this.dustBands.updateLanes(tismal.innerSweptLimit(), tismal.outerSweptLimit(), tismal.gasGiant);
 
-		nucleus.mass = newMass;
+        dustLeft = this.dustBands.dustRemaining(this.innerBound, this.outerBound);
 
-		return nucleus.mass;
-	},
+        this.dustBands.compressLanes();
 
-	collectDust: function(nucleus, band) {
-		if(!band) return 0;
+        if(!this.coalescePlanetismals(tismal)) this.insertPlanet(tismal);
+      }
+    }
 
-		var sweptInner = nucleus.innerSweptLimit(),
-			sweptOuter = nucleus.outerSweptLimit();
+    var planets = [this.planetHead],
+        curr = this.planetHead;
 
-		if(sweptInner < 0) sweptInner = 0;
+    while(curr = curr.next) planets.push(curr);
 
-		if(band.outer <= sweptInner || band.inner >= sweptOuter) return 0;
+    return planets;
+  },
 
-		if(!band.dust) return 0;
+  //Planetismal : nucleus
+  accreteDust: function(nucleus) {
+    var that = this,
+        newMass = nucleus.mass;
 
-		var dustDensity = this.dustDensity,
-			massDensity = DoleParams.massDensity(dustDensity, this.criticalMass, nucleus.mass),
-			density 	= (!band.gas || nucleus.mass < this.criticalMass) ? dustDensity : massDensity,
-			sweptWidth 	= sweptOuter - sweptInner,
-			outside 	= sweptOuter - band.outer,
-			inside 		= band.inner - sweptInner;
-		
-		if(outside < 0) outside = 0;
-		if(inside < 0) 	inside 	= 0;
+    // TODO: Make sure that turning the original DO/WHILE
+    // into a while didn't affect the outcome
+    do {
+      nucleus.mass = newMass;
+      newMass = 0;
 
-		var width 	= sweptWidth - outside - inside,
-			term1	= 4 * Math.PI * nucleus.axis * nucleus.axis,
-			term2 	= (1 - nucleus.eccn * (outside - inside) / sweptWidth),
-			volume	= term1 * nucleus.reducedMargin() * width * term2;
-		
-		return volume * density;
-	},
+      this.dustBands.each(function(band, i) {
+        newMass += that.collectDust(nucleus, band);
+      });
+    }
+    while (newMass - nucleus.mass > 0.0001 * nucleus.mass);
 
-	coalescePlanetismals: function(tismal) {
-		for(var curr = this.planetHead; curr; curr = curr.next) {
+    nucleus.mass = newMass;
 
-			var dist 	= curr.axis - tismal.axis,
-				dist1 	= null,
-				dist2 	= null;
+    return nucleus.mass;
+  },
 
-			if(dist > 0) {
-				dist1 = tismal.outerEffectLimit() - tismal.axis;
-				dist2 = curr.axis - curr.innerEffectLimit();
-			}
-			else {
-				dist1 = tismal.axis - tismal.innerEffectLimit();
-				dist2 = curr.outerEffectLimit() - curr.axis;
-			}
+  collectDust: function(nucleus, band) {
+    if(!band) return 0;
 
-			if(Math.abs(dist) <= dist1 || Math.abs(dist) <= dist1) {
-				this.coalesceTwoPlanets(curr, tismal);
-				return true;
-			}
-		}
-		
-		return false;
-	},
+    var sweptInner = nucleus.innerSweptLimit(),
+        sweptOuter = nucleus.outerSweptLimit();
 
-	coalesceTwoPlanets: function(a, b) {
-		var newMass = a.mass + b.mass,
-			newAxis = newMass / ((a.mass / a.axis) + (b.mass / b.axis)),
-			term1 	= a.mass * Math.sqrt(a.axis * (1.0 - a.eccn * a.eccn)),
-			term2 	= b.mass * Math.sqrt(b.axis * (1.0 - b.eccn * b.eccn)),
-			term3 	= (term1 + term2) / (newMass * Math.sqrt(newAxis)),
-			term4 	= 1.0 - term3 * term3,
-			newEccn = Math.sqrt(Math.abs(term4));
+    if (sweptInner < 0) sweptInner = 0;
 
-		a.mass = newMass;
-		a.axis = newAxis;
-		a.eccn = newEccn;
-		a.gasGiant = a.gasGiant || b.gasGiant;
-	},
+    if (band.outer <= sweptInner || band.inner >= sweptOuter) return 0;
 
-	insertPlanet: function(tismal) {
-		if(!this.planetHead) {
-			this.planetHead = tismal;
-		}
-		else {
-			if(tismal.axis < this.planetHead.axis) {
-				tismal.next = this.planetHead;
-				this.planetHead = tismal;
-			}
-			else {
-				var prev = this.planetHead,
-					curr = this.planetHead.next;
+    if (!band.dust) return 0;
 
-					while(curr && curr.axis < tismal.axis) {
-						prev = curr;
-						curr = curr.next;
-					}
+    var dustDensity = this.dustDensity,
+        massDensity = DoleParams.massDensity(dustDensity, this.criticalMass, nucleus.mass),
+        density = (!band.gas || nucleus.mass < this.criticalMass) ? dustDensity : massDensity,
+        sweptWidth = sweptOuter - sweptInner,
+        outside = sweptOuter - band.outer,
+        inside = band.inner - sweptInner;
 
-				tismal.next = curr;
-				prev.next = tismal;
-			}
-		}
+    if (outside < 0) outside = 0;
+    if (inside < 0) inside = 0;
 
-	}
+    var width = sweptWidth - outside - inside,
+      term1 = 4 * Math.PI * nucleus.axis * nucleus.axis,
+      term2 = (1 - nucleus.eccn * (outside - inside) / sweptWidth),
+      volume = term1 * nucleus.reducedMargin() * width * term2;
+
+    return volume * density;
+  },
+
+  coalescePlanetismals: function(tismal) {
+    for(var curr = this.planetHead; curr; curr = curr.next) {
+
+      var dist = curr.axis - tismal.axis,
+        dist1 = null,
+        dist2 = null;
+
+      if(dist > 0) {
+        dist1 = tismal.outerEffectLimit() - tismal.axis;
+        dist2 = curr.axis - curr.innerEffectLimit();
+      }
+      else {
+        dist1 = tismal.axis - tismal.innerEffectLimit();
+        dist2 = curr.outerEffectLimit() - curr.axis;
+      }
+
+      if(Math.abs(dist) <= dist1 || Math.abs(dist) <= dist1) {
+        this.coalesceTwoPlanets(curr, tismal);
+        return true;
+      }
+    }
+
+    return false;
+  },
+
+  coalesceTwoPlanets: function(a, b) {
+    var newMass = a.mass + b.mass,
+      newAxis = newMass / ((a.mass / a.axis) + (b.mass / b.axis)),
+      term1 = a.mass * Math.sqrt(a.axis * (1.0 - a.eccn * a.eccn)),
+      term2 = b.mass * Math.sqrt(b.axis * (1.0 - b.eccn * b.eccn)),
+      term3 = (term1 + term2) / (newMass * Math.sqrt(newAxis)),
+      term4 = 1.0 - term3 * term3,
+      newEccn = Math.sqrt(Math.abs(term4));
+
+    a.mass = newMass;
+    a.axis = newAxis;
+    a.eccn = newEccn;
+    a.gasGiant = a.gasGiant || b.gasGiant;
+  },
+
+  insertPlanet: function(tismal) {
+    if(!this.planetHead) {
+      this.planetHead = tismal;
+    }
+    else {
+      if(tismal.axis < this.planetHead.axis) {
+        tismal.next = this.planetHead;
+        this.planetHead = tismal;
+      }
+      else {
+        var prev = this.planetHead,
+          curr = this.planetHead.next;
+
+          while(curr && curr.axis < tismal.axis) {
+            prev = curr;
+            curr = curr.next;
+          }
+
+        tismal.next = curr;
+        prev.next = tismal;
+        console.log(this.planetHead);
+      }
+    }
+
+  }
 });
+
+module.exports = Accrete;
