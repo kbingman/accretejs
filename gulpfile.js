@@ -4,11 +4,11 @@ var gulp = require('gulp');
 var concat = require('gulp-concat');
 
 var paths = [
-  'src/Astro.js',
-  'src/DoleParams.js',
-  'src/DustBands.js',
-  'src/Planetismal.js',
-  'src/Accrete.js'
+  'src/astro.js',
+  'src/dole_params.js',
+  'src/dust_bands.js',
+  'src/planetismal.js',
+  'src/accrete.js'
 ];
 
 gulp.task('concat', function() {
