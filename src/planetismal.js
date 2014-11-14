@@ -1,11 +1,11 @@
 var Astro = require('./astro');
 var DoleParams = require('./dole_params');
 
-function Planetismal(a, e, m, g) {
-  this.axis = a;
-  this.eccn = e;
-  this.mass = m || Astro.protoplanetMass;
-  this.gasGiant = g || false;
+function Planetismal(options) {
+  this.axis = options.axis;
+  this.eccn = options.eccn;
+  this.mass = options.mass || Astro.protoplanetMass;
+  this.gasGiant = options.gasGiant || false;
 }
 
 Planetismal.prototype = Object.create({

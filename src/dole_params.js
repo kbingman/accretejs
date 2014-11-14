@@ -1,15 +1,14 @@
 var DoleParams = Object.create({
+
   B: 1.2e-5, // For critical mass
-
   K: 50, // Dust/gas ratio
-
-  dustDensityCoeff : 1.5e-3, 	// A in Dole's paper
-  cloudEccentricity: 0.25,
-  eccentricityCoeff: 0.077,
-
   // ALPHA and N both used in density calculations
   ALPHA: 5,
   N: 3,
+
+  dustDensityCoeff: 1.5e-3, // A in Dole's paper
+  cloudEccentricity: 0.25,
+  eccentricityCoeff: 0.077,
 
   criticalMass: function(radius, eccentricity, luminosity) {
     return (this.B * Math.pow(this.perihelionDistance(radius, eccentricity) * Math.sqrt(luminosity), -0.75));
@@ -26,7 +25,7 @@ var DoleParams = Object.create({
   },
 
   /**
-   *	function apheliondistance
+   * function apheliondistance
    *
    * returns the distance between the orbiting body and the
    * sun at it's furthest approach.
@@ -98,8 +97,8 @@ var DoleParams = Object.create({
     return this.scaleCubeRootMass(50, stellarMass);
   },
 
-  randomEccentricity: function() {
-    return (1 - Math.pow(Math.random(), this.eccentricityCoeff));
+  randomEccentricity: function(pnrg) {
+    return (1 - Math.pow(pnrg(), this.eccentricityCoeff));
   }
 });
 

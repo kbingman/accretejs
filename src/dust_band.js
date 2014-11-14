@@ -4,8 +4,12 @@ function DustBand(innerLimit, outerLimit, dustPresent, gasPresent) {
   this.dust = dustPresent;
   this.gas = gasPresent;
 
-  if(this.dust === undefined) this.dust = true;
-  if(this.gas === undefined) this.gas = true;
+  if (this.dust === undefined) {
+    this.dust = true;
+  }
+  if (this.gas === undefined) {
+    this.gas = true;
+  }
 }
 
 DustBand.prototype = Object.create({
@@ -18,11 +22,11 @@ DustBand.prototype = Object.create({
   next: null,
 
   print: function() {
-    console.log("== DUST BAND ==");
-    console.log("Inner: " + this.inner);
-    console.log("Outer: " + this.outer);
-    console.log("Dust:  " + this.dust);
-    console.log("Gas:   " + this.gas);
+    console.log('== DUST BAND ==');
+    console.log('Inner: ' + this.inner);
+    console.log('Outer: ' + this.outer);
+    console.log('Dust:  ' + this.dust);
+    console.log('Gas:   ' + this.gas);
   }
 });
 

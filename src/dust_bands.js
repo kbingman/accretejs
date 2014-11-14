@@ -20,7 +20,7 @@ DustBands.prototype = Object.create({
   },
 
   updateLanes: function(min, max, usedGas) {
-    this.each(function(band, i) {
+    this.bands.forEach(function(band, i) {
       var newGas = band.gas && !usedGas,
           first = null,
           second = null,
@@ -57,13 +57,13 @@ DustBands.prototype = Object.create({
         next = band;
       }
 
-    })
+    }, this);
   },
 
   dustRemaining: function(innerBound, outerBound) {
     var dustLeft = false;
 
-    this.each(function(band, i) {
+    this.bands.forEach(function(band, i) {
       if(band.dust && band.outer >= innerBound && band.inner <= outerBound) {
         dustLeft = true;
       }
@@ -73,13 +73,13 @@ DustBands.prototype = Object.create({
   },
 
   compressLanes: function() {
-    this.each(function(band, i) {
+    this.bands.forEach(function(band, i) {
       var next = this.bands[i + 1];
 
-      if(next && band.dust === next.dust && band.gas === next.gas) {
+      if(next && band.dust == next.dust && band.gas == next.gas) {
         this.bands.splice(i + 1, 1);
       }
-    })
+    }, this);
   },
 
   // OPTIONAL: after (after which indice to insert)
@@ -91,7 +91,7 @@ DustBands.prototype = Object.create({
       gas: gas  || true
     }
 
-    if(after) {
+    if (after) {
       // This is extremely bad for performance
       // Make this better
       var first = this.bands.slice(0, after + 1),
@@ -103,12 +103,6 @@ DustBands.prototype = Object.create({
     }
 
     return band;
-  },
-
-  each: function(fn) {
-    for(var i = 0; i < this.bands.length; i++) {
-      fn.call(this, this.bands[i], i);
-    }
   }
 
 });
