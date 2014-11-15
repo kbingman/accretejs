@@ -1,4 +1,5 @@
 function DustBands(inner, outer) {
+  this.bands = [];
   this.addBand(inner, outer);
 }
 
@@ -10,11 +11,15 @@ DustBands.prototype = Object.create({
     var curr = this.dustHead,
         dustHere= false;
 
-    this.each(function(band) {
-      if (band && band.inner < outside) dustHere = band.dust;
+    this.bands.forEach(function(band) {
+      if (band && band.inner < outside) {
+        dustHere = band.dust;
+      }
     });
 
-    if(!curr) return false;
+    if(!curr) {
+      return false;
+    }
 
     return dustHere;
   },
@@ -91,13 +96,8 @@ DustBands.prototype = Object.create({
       gas: gas  || true
     }
 
-    if (after) {
-      // This is extremely bad for performance
-      // Make this better
-      var first = this.bands.slice(0, after + 1),
-          last = this.bands.slice(after + 1);
-
-      this.bands = first.concat(band, last);
+    if (after != undefined) {
+      this.bands.splice(after + 1, 0, band);
     } else {
       this.bands.push(band);
     }

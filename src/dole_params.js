@@ -11,7 +11,9 @@ var DoleParams = Object.create({
   eccentricityCoeff: 0.077,
 
   criticalMass: function(radius, eccentricity, luminosity) {
-    return (this.B * Math.pow(this.perihelionDistance(radius, eccentricity) * Math.sqrt(luminosity), -0.75));
+    return this.B *
+      Math.pow(this.perihelionDistance(radius, eccentricity) *
+      Math.sqrt(luminosity), -0.75);;
   },
 
   /**
@@ -70,11 +72,15 @@ var DoleParams = Object.create({
   },
 
   dustDensity: function(stellarMass, oribitalRadius) {
-    return this.dustDensityCoeff * Math.sqrt(stellarMass) * Math.exp(-this.ALPHA * Math.pow(oribitalRadius, 1/this.N));
+    return this.dustDensityCoeff *
+      Math.sqrt(stellarMass) *
+      Math.exp(-this.ALPHA * Math.pow(oribitalRadius, 1/this.N));
   },
 
   massDensity: function(dustDensity, criticalMass, mass) {
-    return this.K * dustDensity / (1 + Math.sqrt(criticalMass / mass) * (this.K - 1));
+    return this.K * dustDensity /
+      (1 + Math.sqrt(criticalMass / mass) *
+      (this.K - 1));
   },
 
   scaleCubeRootMass: function(scale, mass) {

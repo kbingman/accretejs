@@ -6,8 +6,8 @@ var DustBand = require('./dust_band');
 var DustBands = require('./dust_bands');
 var Planetismal = require('./planetismal');
 
-function Accrete(stellarMass, stellarLuminosity) {
-  var seed = 1234;
+function Accrete(seed) {
+  var seed = seed || 1234;
   this.prng = new Alea(seed);
 }
 
@@ -19,8 +19,12 @@ Accrete.prototype = Object.create({
 
   distributePlanets: function(stellarMass, stellarLuminosity) {
 
+    // So the question is, do we do this as an object or not...
     this.stellarMass = stellarMass || 1;
     this.stellarLuminosity = stellarLuminosity || Astro.luminosity(this.stellarMass);
+
+    // console.log('stellarMass', this.stellarMass);
+    // console.log('stellarLuminosity', this.stellarLuminosity);
 
     this.innerBound = DoleParams.innermostPlanet(this.stellarMass);
     this.outerBound = DoleParams.outermostPlanet(this.stellarMass);
@@ -72,7 +76,13 @@ Accrete.prototype = Object.create({
 
     while(curr = curr.next) planets.push(curr);
 
-    return planets;
+    return {
+      planets: planets,
+      star: {
+        mass: this.stellarMass,
+        luminosity: this.stellarLuminosity
+      }
+    };
   },
 
   // Planetismal: nucleus
@@ -164,7 +174,7 @@ Accrete.prototype = Object.create({
   },
 
   coalesceTwoPlanets: function(a, b) {
-    console.log('Collide!!!!');
+    // console.log('Collide!!!!');
     // This needs to be able to create a double planet / moon combination
     var newMass = a.mass + b.mass,
         newAxis = newMass / ((a.mass / a.axis) + (b.mass / b.axis)),

@@ -13,7 +13,7 @@ const SECONDS_IN_HOUR = 3000;
 
 const J = 1.46E-19; /* Used in day-length calcs = cm2/sec2 g; */
 
-const PROTOPLANET_MASS = 1e-15; // Units of solar masses
+const PROTOPLANET_MASS = 1e-25; // Units of solar masses
 
 // For Kothari Radius
 const A1_20 = 6.485e12;
@@ -153,10 +153,7 @@ var Astro = Object.create({
   },
 
   /**
-   * Function period
-   *
    * separation - Units of AU between the masses
-   *
    * returns the period of an entire orbit in Earth days.
    */
   period: function(separation, smallMass, largeMass) {
@@ -192,7 +189,7 @@ var Astro = Object.create({
 
     changeInAngularVelocity = this.changeInEarthAngVel *
       (planet.density / EARTH_DENSITY) *
-      (equatorialRadiusInCm / EARTH_RADIUS) *
+      (equatorialRadiusInCm / EARTH_RADIUS_IN_CM) *
       (EARTH_MASS_IN_GRAMS / planetMassInGrams) *
       Math.pow(planet.sun.mass, 2) *
       (1 / Math.pow(planet.axis, 6));
@@ -250,7 +247,7 @@ var Astro = Object.create({
    * acceleration is returned in units of cm/sec2.
    */
   acceleration: function(mass, radius) {
-      return (GRAV_CONSTANT * (mass * SOLAR_MASS_IN_GRAMS) / Math.pow(radius * CM_PER_KM, 2.0));
+    return (GRAV_CONSTANT * (mass * SOLAR_MASS_IN_GRAMS) / Math.pow(radius * CM_PER_KM, 2.0));
   },
 
   /**
@@ -259,7 +256,7 @@ var Astro = Object.create({
    * units of Earth gravities.
    */
   gravity: function(acceleration) {
-      return (acceleration / EARTH_ACCELERATION);
+    return (acceleration / EARTH_ACCELERATION);
   },
 
   /**
@@ -268,9 +265,9 @@ var Astro = Object.create({
    * or atom. The velocity returned is in cm/sec.
    */
   rmsVel: function(molecularWeight, orbitalRadius) {
-      var exosphericTemp = EARTH_EXOSPHERE_TEMP / Math.pow(orbitalRadius, 2.0);
+    var exosphericTemp = EARTH_EXOSPHERE_TEMP / Math.pow(orbitalRadius, 2.0);
 
-      return (Math.sqrt((3.0 * MOLAR_GAS_CONST * exosphericTemp) / molecularWeight) * CM_PER_METER);
+    return (Math.sqrt((3.0 * MOLAR_GAS_CONST * exosphericTemp) / molecularWeight) * CM_PER_METER);
   },
 
   /**
@@ -281,10 +278,11 @@ var Astro = Object.create({
    * kilometers.
    */
   moleculeLimit: function(mass, equatorialRadius) {
-      var escapeVelocity = this.escapeVel(mass, equatorialRadius);
-      var moleculeLimit = (3.0 * Math.pow(GAS_RETENTION_THRESHOLD * CM_PER_METER, 2.0) *
-        MOLAR_GAS_CONST * EARTH_EXOSPHERE_TEMP) / Math.pow(escape_velocity, 2.0)
-      return moleculeLimit;
+    var escapeVelocity = this.escapeVel(mass, equatorialRadius);
+    var moleculeLimit = (3.0 * Math.pow(GAS_RETENTION_THRESHOLD * CM_PER_METER, 2.0) *
+      MOLAR_GAS_CONST * EARTH_EXOSPHERE_TEMP) / Math.pow(escape_velocity, 2.0)
+
+    return moleculeLimit;
   },
 
   /**
@@ -293,8 +291,8 @@ var Astro = Object.create({
    * in units of kilometers.
    */
   pressure: function(volatileGasInventory, equatorialRadius, gravity) {
-      equatorialRadius = EARTH_RADIUS_IN_KM / equatorialRadius;
-      return (volatileGasInventory * gravity / Math.pow(equatorialRadius, 2.0));
+    equatorialRadius = EARTH_RADIUS_IN_KM / equatorialRadius;
+    return (volatileGasInventory * gravity / Math.pow(equatorialRadius, 2.0));
   },
 
   /**

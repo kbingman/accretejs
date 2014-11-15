@@ -1,15 +1,24 @@
-var Accrete = require('./src/Accrete.js');
+var Accrete = require('./src/accrete.js');
 
-var gen = new Accrete(),
-    sys = gen.distributePlanets();
+var seed = 2000;
 
-console.log(sys)
+var start = +new Date();
+var gen = new Accrete();
+var sys = gen.distributePlanets(1);
 
-// for(var p in sys) {
-//   var au = Math.log(sys[p].axis + 1) / Math.log(10),
-//       rad = Math.pow(sys[p].getEarthMass(), 1/3);
+console.log(+new Date() - start);
+console.log(sys.length);
+
+sys.planets.forEach(function(planet, i) {
+  console.log(planet.axis, planet.getEarthMass(), planet.gasGiant);
+});
+
+
+// for(var p in sys.planets) {
+//   // var au = Math.log(sys[p].axis + 1) / Math.log(10),
+//   //     rad = Math.pow(sys[p].getEarthMass(), 1/3);
 //
-//   console.log(rad * 10)
+//   console.log(sys[p].axis, sys[p].getEarthMass())
 // }
 
 // Planetismal curr = (Planetismal)e.nextElement();
