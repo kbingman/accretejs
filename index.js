@@ -10,7 +10,7 @@ console.log(+new Date() - start);
 console.log(sys.length);
 
 sys.planets.forEach(function(planet, i) {
-  console.log(planet.axis, planet.getEarthMass(), planet.gasGiant);
+  console.log(planet.axis, planet.mass, planet.gasGiant);
 });
 
 

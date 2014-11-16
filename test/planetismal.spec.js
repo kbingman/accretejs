@@ -22,13 +22,14 @@ describe('Planetismal',function(){
       expect(planetismal.mass).to.equal(1);
     });
 
-    // it('should return the mass in earth masses', function(){
-    //   var planetismal = new Planetismal({
-    //     axis: 0.1,
-    //     eccn: 0.001
-    //   });
-    //   expect(planetismal.getEarthMass()).to.equal(1);
-    // });
+    it('should return the mass in earth masses', function(){
+      var planetismal = new Planetismal({
+        axis: 0.1,
+        mass: 1.1526143566158224e-7,
+        eccn: 0.001
+      });
+      expect(planetismal.getEarthMass()).to.equal(0.038356198019601856);
+    });
 
   });
 
