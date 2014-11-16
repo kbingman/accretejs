@@ -7,10 +7,10 @@ var gen = new Accrete();
 var sys = gen.distributePlanets(1);
 
 console.log(+new Date() - start);
-console.log(sys.planets);
+console.log(sys.planets.length);
 
 sys.planets.forEach(function(planet, i) {
-  console.log(planet.axis, planet.mass, planet.gasGiant);
+  console.log(planet.axis, planet.getEarthMass(), planet.gasGiant);
 });
 
 

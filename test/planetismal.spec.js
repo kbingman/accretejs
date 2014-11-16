@@ -12,7 +12,7 @@ describe('Planetismal',function(){
     describe('attributes',function(){
 
       beforeEach(function() {
-        planetismal = Planetismal({
+        planetismal = new Planetismal({
           axis: 0.1,
           eccn: 0.001,
           mass: 1e-25,
@@ -41,7 +41,10 @@ describe('Planetismal',function(){
     describe('defaults', function(){
 
       beforeEach(function() {
-        planetismal = Planetismal();
+        planetismal = new Planetismal({
+          axis: 0,
+          eccn: 0
+        });
       });
 
       it('should return the default eccn', function(){
@@ -65,7 +68,7 @@ describe('Planetismal',function(){
     describe('methods',function(){
 
       beforeEach(function() {
-        planetismal = Planetismal({
+        planetismal = new Planetismal({
           axis: 0.1,
           eccn: 0.001,
           mass: 1.1526143566158224e-7

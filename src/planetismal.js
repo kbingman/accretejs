@@ -11,11 +11,11 @@ var Planetismal = function(options) {
   var next = null;
 
   return {
+    axis: axis,
+    eccn: eccn,
+    mass: mass,
     gasGiant: gasGiant,
     next: next,
-    mass: mass,
-    eccn: eccn,
-    axis: axis,
 
     perihelionDistance: function() {
       return DoleParams.perihelionDistance(axis, eccn);
