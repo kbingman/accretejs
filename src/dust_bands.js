@@ -1,94 +1,10 @@
-function DustBands(inner, outer) {
-  this.bands = [];
-  this.addBand(inner, outer);
-}
+var DustBands = function(inner, outer) {
 
-DustBands.prototype = Object.create({
-
-  bands: [],
-
-  dustAvailable: function(inside, outside) {
-    var curr = this.dustHead,
-        dustHere= false;
-
-    this.bands.forEach(function(band) {
-      if (band && band.inner < outside) {
-        dustHere = band.dust;
-      }
-    });
-
-    if(!curr) {
-      return false;
-    }
-
-    return dustHere;
-  },
-
-  updateLanes: function(min, max, usedGas) {
-    this.bands.forEach(function(band, i) {
-      var newGas = band.gas && !usedGas,
-          first = null,
-          second = null,
-          next = band;
-
-      if (band.inner < min && band.outer > max) {
-        first = this.addBand(min, max, false, newGas, i);
-        second = this.addBand(max, band.outer, band.dust, band.gas, i + 1);
-
-        band.outer = min;
-
-        next = second;
-      }
-      else if(band.inner < max && band.outer > max) {
-        first = this.addBand(max, band.outer, band.dust, band.gas, i);
-
-        band.outer = max;
-        band.dust = false;
-        band.gas = newGas;
-        next = first;
-      }
-      else if(band.inner < min && band.outer > min) {
-        first = this.addBand(min, band.outer, false, newGas, i);
-
-        band.outer = min;
-        next = first;
-      }
-      else if(band.inner >= min && band.outer <= max) {
-        band.dust = false;
-        band.gas = newGas;
-        next = band;
-      }
-      else if(band.inner > max || band.outer < min) {
-        next = band;
-      }
-
-    }, this);
-  },
-
-  dustRemaining: function(innerBound, outerBound) {
-    var dustLeft = false;
-
-    this.bands.forEach(function(band, i) {
-      if(band.dust && band.outer >= innerBound && band.inner <= outerBound) {
-        dustLeft = true;
-      }
-    });
-
-    return dustLeft;
-  },
-
-  compressLanes: function() {
-    this.bands.forEach(function(band, i) {
-      var next = this.bands[i + 1];
-
-      if(next && band.dust == next.dust && band.gas == next.gas) {
-        this.bands.splice(i + 1, 1);
-      }
-    }, this);
-  },
+  var bands = [];
+  var dustHead = addBand(inner, outer);
 
   // OPTIONAL: after (after which indice to insert)
-  addBand: function(min, max, dust, gas, after) {
+  function addBand(min, max, dust, gas, after) {
     var band = {
       inner: min,
       outer: max,
@@ -97,14 +13,102 @@ DustBands.prototype = Object.create({
     }
 
     if (after != undefined) {
-      this.bands.splice(after + 1, 0, band);
+      bands.splice(after + 1, 0, band);
     } else {
-      this.bands.push(band);
+      bands.push(band);
     }
 
     return band;
   }
 
-});
+  // 'Public' methods
+  return {
+    bands: bands,
+    dustHead: dustHead,
+
+    dustAvailable: function(inside, outside) {
+      var dustHere = false;
+
+      if(!dustHead) {
+        return false;
+      }
+
+      bands.forEach(function(band) {
+        if (band && band.inner < outside) {
+          dustHere = band.dust;
+        }
+      });
+
+      return dustHere;
+    },
+
+    updateLanes: function(min, max, usedGas) {
+      bands.forEach(function(band, i) {
+        var newGas = band.gas && !usedGas,
+            first = null,
+            second = null,
+            next = band;
+
+        if (band.inner < min && band.outer > max) {
+          first = addBand(min, max, false, newGas, i);
+          second = addBand(max, band.outer, band.dust, band.gas, i + 1);
+
+          band.outer = min;
+
+          next = second;
+        }
+        else if(band.inner < max && band.outer > max) {
+          first = addBand(max, band.outer, band.dust, band.gas, i);
+
+          band.outer = max;
+          band.dust = false;
+          band.gas = newGas;
+          next = first;
+        }
+        else if(band.inner < min && band.outer > min) {
+          first = addBand(min, band.outer, false, newGas, i);
+
+          band.outer = min;
+          next = first;
+        }
+        else if(band.inner >= min && band.outer <= max) {
+          band.dust = false;
+          band.gas = newGas;
+          next = band;
+        }
+        else if(band.inner > max || band.outer < min) {
+          next = band;
+        }
+
+      });
+    },
+
+    dustRemaining: function(innerBound, outerBound) {
+      var dustLeft = false;
+
+      bands.forEach(function(band, i) {
+        if (band.dust && band.outer >= innerBound && band.inner <= outerBound) {
+          dustLeft = true;
+        }
+      });
+
+      return dustLeft;
+    },
+
+    compressLanes: function() {
+      bands.forEach(function(band, i) {
+        var next = bands[i + 1];
+
+        if (next && band.dust == next.dust && band.gas == next.gas) {
+          bands.splice(i + 1, 1);
+        }
+      });
+    },
+
+    addBand: addBand
+
+  }
+
+};
 
 module.exports = DustBands;

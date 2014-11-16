@@ -127,11 +127,11 @@ var Astro = Object.create({
     return temp;
   },
 
-  empiricalDensity: function(mass, orbRadius, rEcosphere, gasGiant) {
+  empiricalDensity: function(mass, orbRadius, ecosphereRadius, gasGiant) {
     var dens;
 
     dens = Math.pow(mass * SOLAR_MASS_IN_GRAMS, 1/8);
-    dens = temp * Math.sqrt(Math.sqrt(rEcosphere, orbRadius));
+    dens = temp * Math.sqrt(Math.sqrt(ecosphereRadius, orbRadius));
 
     if (gasGiant) {
       return dens * 1.2;

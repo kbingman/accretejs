@@ -33,7 +33,7 @@ describe('Accrete', function(){
     it('should create an array of planets', function() {
       var system = accrete.distributePlanets();
 
-      expect(system.planets.length).to.equal(20);
+      expect(system.planets.length).to.equal(15);
     });
 
     it('should return the default stellar mass', function() {

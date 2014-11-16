@@ -35,6 +35,12 @@ describe('Astro', function(){
     it('should return the orbitalZone');
   });
 
+  describe('ecoSphere', function() {
+    it('should return the ecoSphere', function(){
+      expect(Astro.ecoSphere(1)).to.equal(1);
+    });
+  });
+
   describe('kothariRadius', function() {
     it('should return the kothariRadius');
   });

@@ -3,8 +3,7 @@ var DustBands = require('../src/dust_bands');
 
 describe('DustBands',function(){
   beforeEach(function(){
-    dustBands = new DustBands(50, 100);
-    dustBands.dustHead = dustBands.bands[0];
+    dustBands = DustBands(50, 100);
   });
 
   describe('creating dust bands',function(){
