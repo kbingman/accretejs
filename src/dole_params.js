@@ -33,7 +33,7 @@ var DoleParams = Object.create({
    * sun at it's furthest approach.
    */
   aphelionDistance: function(radius, eccentricity) {
-    return radius * (1 - eccentricity);
+    return radius * (1 + eccentricity);
   },
 
   reducedMass: function(mass) {

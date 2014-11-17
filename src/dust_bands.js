@@ -5,6 +5,7 @@ var DustBands = function(inner, outer) {
 
   // OPTIONAL: after (after which indice to insert)
   function addBand(min, max, dust, gas, after) {
+    bands = this.bands || bands;
     var band = {
       inner: min,
       outer: max,
@@ -29,11 +30,11 @@ var DustBands = function(inner, outer) {
     dustAvailable: function(inside, outside) {
       var dustHere = false;
 
-      if(!dustHead) {
+      if(!this.dustHead) {
         return false;
       }
 
-      bands.forEach(function(band) {
+      this.bands.forEach(function(band) {
         if (band && band.inner < outside) {
           dustHere = band.dust;
         }
@@ -43,7 +44,7 @@ var DustBands = function(inner, outer) {
     },
 
     updateLanes: function(min, max, usedGas) {
-      bands.forEach(function(band, i) {
+      this.bands.forEach(function(band, i) {
         var newGas = band.gas && !usedGas,
             first = null,
             second = null,
@@ -86,7 +87,7 @@ var DustBands = function(inner, outer) {
     dustRemaining: function(innerBound, outerBound) {
       var dustLeft = false;
 
-      bands.forEach(function(band, i) {
+      this.bands.forEach(function(band, i) {
         if (band.dust && band.outer >= innerBound && band.inner <= outerBound) {
           dustLeft = true;
         }
@@ -96,13 +97,13 @@ var DustBands = function(inner, outer) {
     },
 
     compressLanes: function() {
-      bands.forEach(function(band, i) {
+      this.bands.forEach(function(band, i) {
         var next = bands[i + 1];
 
         if (next && band.dust == next.dust && band.gas == next.gas) {
-          bands.splice(i + 1, 1);
+          this.bands.splice(i + 1, 1);
         }
-      });
+      }, this);
     },
 
     addBand: addBand

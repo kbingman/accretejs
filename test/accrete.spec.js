@@ -30,11 +30,11 @@ describe('Accrete', function(){
   // This could get big...
   describe('create system', function() {
 
-    // it('should create an array of planets', function() {
-    //   var system = accrete.distributePlanets();
-    //
-    //   expect(system.length).to.equal(10);
-    // });
+    it('should create an array of planets', function() {
+      var system = accrete.distributePlanets();
+
+      expect(system.planets.length).to.equal(24);
+    });
 
     it('should return the default stellar mass', function() {
       var system = accrete.distributePlanets();

@@ -10,6 +10,7 @@ const CM_IN_AU = 1.495978707e13;
 const KM_IN_AU = 1.495978707e8;
 const DAYS_IN_YEAR = 365.256;
 const SECONDS_IN_HOUR = 3000;
+const GRAV_CONSTANT = 6.672E-8; /* units of dyne cm2/gram2 */
 
 const J = 1.46E-19; /* Used in day-length calcs = cm2/sec2 g; */
 
@@ -44,7 +45,7 @@ var Astro = Object.create({
     return Math.pow(mass, n);
   },
 
-  ecoSphere: function(luminosity) {
+  ecosphere: function(luminosity) {
     return Math.sqrt(luminosity);
   },
 
@@ -128,16 +129,16 @@ var Astro = Object.create({
   },
 
   empiricalDensity: function(mass, orbRadius, ecosphereRadius, gasGiant) {
-    var dens;
+    var density;
 
-    dens = Math.pow(mass * SOLAR_MASS_IN_GRAMS, 1/8);
-    dens = temp * Math.sqrt(Math.sqrt(ecosphereRadius, orbRadius));
+    density = Math.pow(mass * SOLAR_MASS_IN_GRAMS, 1/8);
+    density = density * Math.sqrt(Math.sqrt(ecosphereRadius, orbRadius));
 
     if (gasGiant) {
-      return dens * 1.2;
+      return density * 1.2;
     }
     else {
-      return dens * 5.5;
+      return density * 5.5;
     }
   },
 
@@ -227,7 +228,7 @@ var Astro = Object.create({
    */
   escapeVel: function(mass, radius) {
     var massInGrams = mass * SOLAR_MASS_IN_GRAMS;
-    var radiusInCm = radius * CM_PER_KM;
+    var radiusInCm = radius * CM_IN_KM;
 
     return (Math.sqrt(2.0 * GRAV_CONSTANT * massInGrams / radiusInCm));
   },
@@ -247,7 +248,7 @@ var Astro = Object.create({
    * acceleration is returned in units of cm/sec2.
    */
   acceleration: function(mass, radius) {
-    return (GRAV_CONSTANT * (mass * SOLAR_MASS_IN_GRAMS) / Math.pow(radius * CM_PER_KM, 2.0));
+    return (GRAV_CONSTANT * (mass * SOLAR_MASS_IN_GRAMS) / Math.pow(radius * CM_IN_KM, 2.0));
   },
 
   /**

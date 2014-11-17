@@ -18,43 +18,43 @@ var Planetismal = function(options) {
     next: next,
 
     perihelionDistance: function() {
-      return DoleParams.perihelionDistance(axis, eccn);
+      return DoleParams.perihelionDistance(this.axis, this.eccn);
     },
 
     aphelionDistance: function() {
-      return DoleParams.aphelionDistance(axis, eccn);
+      return DoleParams.aphelionDistance(this.axis, this.eccn);
     },
 
     reducedMass: function() {
-      return DoleParams.reducedMass(mass)
+      return DoleParams.reducedMass(this.mass)
     },
 
     reducedMargin: function() {
-      return DoleParams.reducedMargin(mass);
+      return DoleParams.reducedMargin(this.mass);
     },
 
     innerEffectLimit: function() {
-      return DoleParams.innerEffectLimit(axis, eccn, DoleParams.reducedMargin(mass));
+      return DoleParams.innerEffectLimit(this.axis, this.eccn, DoleParams.reducedMargin(this.mass));
     },
 
     outerEffectLimit: function() {
-      return DoleParams.outerEffectLimit(axis, eccn, DoleParams.reducedMargin(mass));
+      return DoleParams.outerEffectLimit(this.axis, this.eccn, DoleParams.reducedMargin(this.mass));
     },
 
     innerSweptLimit: function() {
-      return DoleParams.innerSweptLimit(axis, eccn, DoleParams.reducedMargin(mass));
+      return DoleParams.innerSweptLimit(this.axis, this.eccn, DoleParams.reducedMargin(this.mass));
     },
 
     outerSweptLimit: function() {
-      return DoleParams.outerSweptLimit(axis, eccn, DoleParams.reducedMargin(mass));
+      return DoleParams.outerSweptLimit(this.axis, this.eccn, DoleParams.reducedMargin(this.mass));
     },
 
     criticalMass: function(luminosity) {
-      return DoleParams.criticalMass(axis, eccn, luminosity);
+      return DoleParams.criticalMass(this.axis, this.eccn, luminosity);
     },
 
     getEarthMass: function() {
-      return mass * Astro.solarMassInEarthMass;
+      return this.mass * Astro.solarMassInEarthMass;
     }
   }
 

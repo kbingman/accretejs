@@ -80,15 +80,18 @@ describe('Planetismal',function(){
       });
 
       it('should return the correct perihelionDistance', function(){
-        expect(planetismal.perihelionDistance()).to.equal(0.0999);
+        planetismal.axis = 1;
+        expect(planetismal.perihelionDistance()).to.equal(0.999);
       });
 
       it('should return the correct aphelionDistance', function(){
-        expect(planetismal.aphelionDistance()).to.equal(0.0999);
+        planetismal.axis = 1;
+        expect(planetismal.aphelionDistance()).to.equal(0.999);
       });
 
       it('should return the correct reducedMass', function(){
-        expect(planetismal.reducedMass()).to.equal(1.152614223763852e-7);
+        planetismal.mass = 1;
+        expect(planetismal.reducedMass()).to.equal(0.5);
       });
 
       it('should return the correct reducedMargin', function(){
