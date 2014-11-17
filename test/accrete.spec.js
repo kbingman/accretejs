@@ -10,10 +10,6 @@ describe('Accrete', function(){
 
   describe('initialize', function() {
 
-    it('should be defined', function() {
-      expect(accrete).to.be.defined;
-    });
-
     it('should return repeatable random numbers', function() {
       var rand = accrete.prng();
       expect(round(rand)).to.equal(0.954);
@@ -33,7 +29,7 @@ describe('Accrete', function(){
     it('should create an array of planets', function() {
       var system = accrete.distributePlanets();
 
-      expect(system.planets.length).to.equal(24);
+      expect(system.planets.length).to.equal(10);
     });
 
     it('should return the default stellar mass', function() {

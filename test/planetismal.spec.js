@@ -86,7 +86,7 @@ describe('Planetismal',function(){
 
       it('should return the correct aphelionDistance', function(){
         planetismal.axis = 1;
-        expect(planetismal.aphelionDistance()).to.equal(0.999);
+        expect(planetismal.aphelionDistance()).to.equal(1.001);
       });
 
       it('should return the correct reducedMass', function(){
@@ -103,7 +103,7 @@ describe('Planetismal',function(){
       });
 
       it('should return the correct outerEffectLimit', function(){
-        expect(planetismal.outerEffectLimit()).to.equal(0.10174071470539617);
+        expect(planetismal.outerEffectLimit()).to.equal(0.10194439981992148);
       });
 
       it('should return the correct innerSweptLimit', function(){
@@ -111,7 +111,7 @@ describe('Planetismal',function(){
       });
 
       it('should return the correct outerSweptLimit', function(){
-        expect(planetismal.outerSweptLimit()).to.equal(0.13565428627386156);
+        expect(planetismal.outerSweptLimit()).to.equal(0.135925866426562);
       });
 
       it('should return the correct criticalMass', function(){
