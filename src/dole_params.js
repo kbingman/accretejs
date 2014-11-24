@@ -52,23 +52,29 @@ var DoleParams = Object.create({
     return outer / (1.0 - this.cloudEccentricity);
   },
 
-  innerEffectLimit: function(a, e, m) {
-    return this.perihelionDistance(a, e) * (1 - m);
+  innerEffectLimit: function(options) {
+    var mass = this.reducedMargin(options.mass);
+    return this.perihelionDistance(options.axis, options.eccn) * (1 - mass);
   },
 
-  outerEffectLimit: function(a, e, m) {
-    return this.aphelionDistance(a, e) * (1 + m);
+  outerEffectLimit: function(options) {
+    var mass = this.reducedMargin(options.mass);
+    return this.aphelionDistance(options.axis, options.eccn) * (1 + mass);
   },
 
-  innerSweptLimit: function(a, e, m) {
-    // TODO: Not sure quite yet if we're interacting with this in a
-    // way where we can't call innerEffectLimit here...
-    return this.lowBound(this.innerEffectLimit(a, e, m));
+  /**
+   * TODO: Not sure quite yet if we're interacting with this in a
+   * way where we can't call innerEffectLimit here...
+   */
+  innerSweptLimit: function(options) {
+    return this.lowBound(this.innerEffectLimit(options));
   },
 
-  outerSweptLimit: function(a, e, m) {
-    // TODO: Read comment above
-    return this.highBound(this.outerEffectLimit(a, e, m));
+  /**
+   * TODO: Read comment above
+   */
+  outerSweptLimit: function(options) {
+    return this.highBound(this.outerEffectLimit(options));
   },
 
   dustDensity: function(stellarMass, oribitalRadius) {
@@ -105,7 +111,31 @@ var DoleParams = Object.create({
 
   randomEccentricity: function(pnrg) {
     return (1 - Math.pow(pnrg(), this.eccentricityCoeff));
-  }
+  },
+
+  /**
+   * this is what stellar_dust_limit returns
+   * return(200.0 * pow(stellar_mass_ratio,(1.0 / 3.0)));
+   * Since I cannot find the original formula, I guess:
+   */
+  planetOuterSweptLimit: function(planetaryMass) {
+    return 1 * Math.pow(planetaryMass, (1 / 3));
+  },
+
+  planetOuterDustLimit: function(stellarMass) {
+    return this.scaleCubeRootMass(0.07, stellarMass);
+  },
+
+  innermostMoon: function(planetaryMass) {
+    // need to figure out what this is...
+    return this.scaleCubeRootMass(0.01, planetaryMass);
+  },
+
+  outermostMoon: function(planetaryMass) {
+    // need to figure out what this is...
+    return this.scaleCubeRootMass(0.1, planetaryMass);
+  },
+
 });
 
 module.exports = DoleParams;

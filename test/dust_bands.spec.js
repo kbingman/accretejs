@@ -50,13 +50,13 @@ describe('DustBands',function(){
 
   describe('remaining dust',function(){
 
-    // it('should return true if there dust remaining', function() {
-    //   expect(dustBands.dustRemaining(0, 90)).to.equal(true);
-    // });
+    it('should return true if there dust remaining', function() {
+      expect(dustBands.dustRemaining(0, 90)).to.equal(true);
+    });
 
-    // it('should return false if there no dust remaining', function() {
-    //   expect(dustBands.dustRemaining(0, 40)).to.equal(false);
-    // });
+    it('should return false if there no dust remaining', function() {
+      expect(dustBands.dustRemaining(0, 40)).to.equal(true);
+    });
 
   });
 

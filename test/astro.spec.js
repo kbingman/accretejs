@@ -20,58 +20,48 @@ describe('Astro', function(){
 
   });
 
-  describe('ecosphereRadius', function() {
+  describe('methods', function() {
     it('should return the ecoSphere', function() {
       var ecosphereRadius = Astro.ecosphere(system.star.luminosity);
 
       expect(ecosphereRadius).to.equal(1);
     });
-  });
 
-  describe('period', function() {
-    it('should return the period in days', function() {
-      var period = Astro.period(planet.axis, planet.mass, system.star.mass);
-      expect(round(period)).to.equal(67.756);
-    });
-  });
-
-  describe('orbitalZone', function() {
     it('should return the orbitalZone', function() {
       var zone = Astro.orbitalZone(system.star.luminosity, planet.axis);
       expect(zone).to.equal(1);
     });
-  });
 
-  describe('kothariRadius', function() {
     it('should return the kothariRadius', function() {
       var zone = Astro.orbitalZone(system.star.luminosity, planet.axis);
       var kothariRadius = Astro.kothariRadius(planet.mass, planet.gasGiant, zone);
 
       expect(kothariRadius).to.equal(1.6283585806954553e-14);
     });
-  });
 
-  describe('empiricalDensity', function() {
     it('should return the empiricalDensity', function() {
       var ecosphereRadius = Astro.ecosphere(system.star.luminosity)
       var empiricalDensity = Astro.empiricalDensity(planet.mass, planet.axis, ecosphereRadius, planet.gasGiant);
 
       expect(round(empiricalDensity, 0)).to.equal(10849);
     });
-  });
 
-  describe('volumeRadius', function() {
     it('should return the volumeRadius', function() {
       var ecosphereRadius = Astro.ecosphere(system.star.luminosity);
       var density = Astro.empiricalDensity(planet.mass, planet.axis, ecosphereRadius, planet.gasGiant)
       var volumeRadius = Astro.volumeRadius(planet.mass, density);
 
-
       expect(round(volumeRadius)).to.equal(171.505);
     });
-  });
 
-  describe('escapeVel', function() {
+    it('should return the greenhouse');
+    it('should return the pressure');
+    it('should return the moleculeLimit');
+    it('should return the rmsVel');
+    it('should return the gravity');
+    it('should return the acceleration');
+    it('should return the inclination');
+
     it('should return the escapeVel', function() {
       var ecosphereRadius = Astro.ecosphere(system.star.luminosity);
       var density = Astro.empiricalDensity(planet.mass, planet.axis, ecosphereRadius, planet.gasGiant);
@@ -80,6 +70,23 @@ describe('Astro', function(){
 
       expect(round(escapeVel, 0)).to.equal(1335563);
     });
+
+    it('should return the dayLength');
+
+    it('should return the period in days', function() {
+      var period = Astro.period(planet.axis, planet.mass, system.star.mass);
+      expect(round(period)).to.equal(67.756);
+    });
+
+    it('should return the volumeDensity', function() {
+      var ecosphereRadius = Astro.ecosphere(system.star.luminosity);
+      var density = Astro.empiricalDensity(planet.mass, planet.axis, ecosphereRadius, planet.gasGiant)
+      var volumeRadius = Astro.volumeRadius(planet.mass, density);
+      var volumeDensity = Astro.volumeDensity(planet.mass, volumeRadius);
+
+      expect(round(volumeDensity)).to.equal(0.033);
+    });
   });
+
 
 });

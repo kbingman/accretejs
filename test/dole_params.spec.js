@@ -19,101 +19,107 @@ var star = {
 
 describe('DoleParams', function(){
 
-  it('should be calculate criticalMass', function() {
+  it('should calculate the criticalMass', function() {
     var result = DoleParams.criticalMass(planet.axis, planet.eccn, star.luminosity);
     expect(round(result, 7)).to.equal(0.0000308);
   });
 
-  it('should be calculate perihelionDistance', function() {
+  it('should calculate the perihelionDistance', function() {
     var result = DoleParams.perihelionDistance(planet.axis, planet.eccn);
     expect(round(result, 3)).to.equal(0.285);
   });
 
-  it('should be calculate aphelionDistance', function() {
+  it('should calculate the aphelionDistance', function() {
     var result = DoleParams.aphelionDistance(planet.axis, planet.eccn);
     expect(round(result, 3)).to.equal(0.366);
   });
 
-  it('should be calculate reducedMass', function() {
+  it('should calculate the reducedMass', function() {
     var result = DoleParams.reducedMass(0.5);
     expect(round(result, 3)).to.equal(0.333);
   });
 
-  it('should be calculate reducedMargin', function() {
+  it('should calculate the reducedMargin', function() {
     var result = DoleParams.reducedMargin(0.5);
     expect(round(result, 3)).to.equal(0.76);
   });
 
-  it('should be calculate lowBound', function() {
+  it('should calculate the lowBound', function() {
     var result = DoleParams.lowBound(0.5);
     expect(round(result, 3)).to.equal(0.4);
   });
 
-  it('should be calculate highBound', function() {
+  it('should calculate the highBound', function() {
     var result = DoleParams.highBound(0.5);
     expect(round(result, 3)).to.equal(0.667);
   });
 
-  it('should be calculate innerEffectLimit', function() {
-    var result = DoleParams.innerEffectLimit(planet.axis, planet.eccn, planet.mass);
-    expect(round(result, 3)).to.equal(0.285);
+  it('should calculate the innerEffectLimit', function() {
+    var result = DoleParams.innerEffectLimit(planet);
+    expect(round(result, 3)).to.equal(0.279);
   });
 
-  it('should be calculate outerEffectLimit', function() {
-    var result = DoleParams.outerEffectLimit(planet.axis, planet.eccn, planet.mass);
-    expect(round(result, 3)).to.equal(0.366);
+  it('should calculate the outerEffectLimit', function() {
+    var result = DoleParams.outerEffectLimit(planet);
+    expect(round(result, 3)).to.equal(0.373);
   });
 
-  it('should be calculate innerSweptLimit', function() {
-    var result = DoleParams.innerSweptLimit(planet.axis, planet.eccn, planet.mass);
-    expect(round(result, 3)).to.equal(0.228);
+  it('should calculate the innerSweptLimit', function() {
+    var result = DoleParams.innerSweptLimit(planet);
+    expect(round(result, 3)).to.equal(0.223);
   });
 
-  it('should be calculate outerSweptLimit', function() {
-    var result = DoleParams.outerSweptLimit(planet.axis, planet.eccn, planet.mass);
-    expect(round(result, 3)).to.equal(0.488);
+  it('should calculate the outerSweptLimit', function() {
+    var result = DoleParams.outerSweptLimit(planet);
+    expect(round(result, 3)).to.equal(0.497);
   });
 
-  it('should be calculate dustDensity', function() {
+  it('should calculate the dustDensity', function() {
     var result = DoleParams.dustDensity(star.mass, planet.axis);
     expect(round(result, 3)).to.equal(0);
   });
 
-  it('should be calculate massDensity');
-  // function() {
-  //   var result = DoleParams.massDensity(dustDensity, criticalMass, mass);
-  //   expect(round(result, 3)).to.equal(0.488);
-  // }
+  it('should calculate the massDensity', function() {
+    var dustDensity = DoleParams.dustDensity(star.mass, planet.axis);
+    var criticalMass = DoleParams.criticalMass(planet.axis, planet.eccn, star.luminosity);
+    var result = DoleParams.massDensity(dustDensity, criticalMass, planet.mass);
 
+    expect(round(result, 3)).to.equal(0);
+  });
 
-  it('should be calculate scaleCubeRootMass', function() {
+  it('should calculate the scaleCubeRootMass', function() {
     var result = DoleParams.scaleCubeRootMass(1, planet.mass);
     expect(round(result, 3)).to.equal(0.005);
   });
 
-  it('should be calculate innerDustLimit', function() {
+  it('should calculate the innerDustLimit', function() {
     var result = DoleParams.innerDustLimit(star.mass);
     expect(result).to.equal(0);
   });
 
-  it('should be calculate outerDustLimit', function() {
+  it('should calculate the outerDustLimit', function() {
     var result = DoleParams.outerDustLimit(star.mass);
     expect(round(result, 3)).to.equal(200);
   });
 
-  it('should be calculate innermostPlanet', function() {
+  it('should calculate the innermostPlanet', function() {
     var result = DoleParams.innermostPlanet(star.mass);
     expect(round(result, 3)).to.equal(0.3);
   });
 
-  it('should be calculate outermostPlanet', function() {
+  it('should calculate the outermostPlanet', function() {
     var result = DoleParams.outermostPlanet(star.mass);
     expect(round(result, 3)).to.equal(50);
   });
 
-  it('should be calculate randomEccentricity', function() {
+  it('should calculate the randomEccentricity', function() {
     var result = DoleParams.randomEccentricity(alea);
     expect(round(result, 3)).to.equal(0.048);
+  });
+
+  it('should calculate the planetDustLimit', function() {
+    var result = DoleParams.planetDustLimit(3);
+    expect(round(result, 3)).to.equal(0.144);
   });
 
 });

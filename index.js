@@ -3,8 +3,8 @@ var Accrete = require('./src/accrete.js');
 var seed = 2000;
 
 var start = +new Date();
-var gen = new Accrete(42);
-var sys = gen.distributePlanets(1);
+var gen = new Accrete('hello42');
+var sys = gen.distributePlanets(1.2);
 
 console.log(+new Date() - start);
 console.log(sys.planets.length);
