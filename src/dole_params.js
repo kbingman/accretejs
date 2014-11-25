@@ -105,8 +105,8 @@ var DoleParams = Object.create({
     return this.scaleCubeRootMass(0.3, stellarMass);
   },
 
-  outermostPlanet: function(stellarMass) {
-    return this.scaleCubeRootMass(50, stellarMass);
+  outermostPlanet: function(mass) {
+    return this.scaleCubeRootMass(50, mass);
   },
 
   randomEccentricity: function(pnrg) {
@@ -119,21 +119,21 @@ var DoleParams = Object.create({
    * Since I cannot find the original formula, I guess:
    */
   planetOuterSweptLimit: function(planetaryMass) {
-    return 1 * Math.pow(planetaryMass, (1 / 3));
+    return 0.01 * Math.pow(planetaryMass, (1 / 3));
   },
 
-  planetOuterDustLimit: function(stellarMass) {
-    return this.scaleCubeRootMass(0.07, stellarMass);
+  planetOuterDustLimit: function(planetaryMass) {
+    return this.scaleCubeRootMass(10, planetaryMass);
   },
 
   innermostMoon: function(planetaryMass) {
     // need to figure out what this is...
-    return this.scaleCubeRootMass(0.01, planetaryMass);
+    return this.scaleCubeRootMass(0.1, planetaryMass);
   },
 
   outermostMoon: function(planetaryMass) {
     // need to figure out what this is...
-    return this.scaleCubeRootMass(0.1, planetaryMass);
+    return this.scaleCubeRootMass(1, planetaryMass);
   },
 
 });

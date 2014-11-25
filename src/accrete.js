@@ -91,7 +91,6 @@ Accrete.prototype = Object.create({
   distributeMoons: function(planetaryMass, stellarLuminosity) {
 
     var moonHead = null;
-
     var tismal, mass, curr, moons, dustDensity, criticalMass;
     var dustLeft = true;
 
@@ -99,16 +98,16 @@ Accrete.prototype = Object.create({
 
     while (dustLeft) {
       tismal = Planetismal({
-        axis: (this.prng() * DoleParams.outermostMoon(planetaryMass)) + DoleParams.innermostMoon(planetaryMass),
+        axis: (this.prng() * DoleParams.outermostMoon(planetaryMass)) + DoleParams.innermostPlanet(planetaryMass),
         eccn: DoleParams.randomEccentricity(this.prng)
       });
+
+      // console.log('innermost planet', DoleParams.innermostMoon(planetaryMass))
+      // console.log('outermost planet', DoleParams.outermostMoon(planetaryMass))
 
       dustDensity = DoleParams.dustDensity(planetaryMass, tismal.axis);
       criticalMass = DoleParams.criticalMass(tismal.axis, tismal.eccn, stellarLuminosity);
       mass = this.accreteDust(tismal, dustBands.bands, criticalMass, dustDensity);
-
-      // console.log('dustDensity', dustDensity);
-      // console.log('mass', mass);
 
       if (mass != 0.0 && mass != Astro.protomoonMass) {
 
@@ -118,22 +117,17 @@ Accrete.prototype = Object.create({
 
         dustBands.updateLanes(0, DoleParams.planetOuterSweptLimit(tismal.mass));
 
-        dustLeft = dustBands.dustRemaining(DoleParams.innermostMoon(planetaryMass), DoleParams.outermostMoon(planetaryMass));
-
-        // console.log('dustLeft', dustLeft);
-        // console.log('tismal', tismal.mass);
-        // console.log('outer sweep', DoleParams.planetOuterSweptLimit(tismal.mass));
-        // console.log('inner', DoleParams.innermostMoon(planetaryMass));
-        // console.log('outer', DoleParams.outermostMoon(planetaryMass));
+        dustLeft = dustBands.dustRemaining(DoleParams.innermostPlanet(planetaryMass), DoleParams.outermostPlanet(planetaryMass));
 
         dustBands.compressLanes();
 
-        // var temp = this.coalescePlanetismals(tismal, planetHead);
-
-        if(!this.coalescePlanetismals(tismal, moonHead)) {
+        if (!this.coalescePlanetismals(tismal, moonHead) && tismal.mass > Astro.protomoonMass) {
+          // console.log('coalescePlanetismals');
+          // console.log(tismal);
           moonHead = this.insertPlanet(tismal, moonHead);
         }
       } else {
+        // console.log('Break', +new Date());
         break;
       }
     }
@@ -208,7 +202,6 @@ Accrete.prototype = Object.create({
   },
 
   coalescePlanetismals: function(planetismal, planetHead) {
-    // console.log('coalescePlanetismals', +new Date())
     for (var curr = planetHead; curr; curr = curr.next) {
       var dist = curr.axis - planetismal.axis,
           dist1 = null,
@@ -247,6 +240,8 @@ Accrete.prototype = Object.create({
     a.axis = newAxis;
     a.eccn = newEccn;
     a.gasGiant = a.gasGiant || b.gasGiant;
+
+    // console.log(a)
 
     return a;
   },

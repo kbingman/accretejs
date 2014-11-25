@@ -44,6 +44,7 @@ var DustBands = function(inner, outer) {
     },
 
     updateLanes: function(min, max, usedGas) {
+      // console.log('update')
       this.bands.forEach(function(band, i) {
         var newGas = band.gas && !usedGas,
             first = null,

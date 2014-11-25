@@ -105,17 +105,17 @@ describe('Accrete', function(){
     it('should calcute a planets moons', function(){
       system = accrete.distributePlanets();
       planet = system.planets[7];
-      console.log('planet mass', planet.getEarthMass());
-      var moons = accrete.distributeMoons(planet.mass, 1);
-
       console.log('');
-      console.log('Planets');
-      system.planets.forEach(function(planet) {
-        console.log(planet.getEarthMass());
-      });
-      console.log('Moons', moons.length);
-      moons.forEach(function(moon) {
-        console.log(moon.getEarthMass());
+      // console.log('planet mass', planet.getEarthMass());
+
+
+      // console.log('Planets');
+      system.planets.forEach(function(planet, i) {
+        var moons = accrete.distributeMoons(planet.mass, 1);
+        console.log('Planet:', i, 'Moons:', moons.length);
+        moons.forEach(function(moon) {
+          console.log(moon.mass);
+        });
       });
 
     });

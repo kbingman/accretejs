@@ -15,7 +15,7 @@ const GRAV_CONSTANT = 6.672E-8; /* units of dyne cm2/gram2 */
 const J = 1.46E-19; /* Used in day-length calcs = cm2/sec2 g; */
 
 const PROTOPLANET_MASS = 1e-25; // Units of solar masses
-const PROTOMOON_MASS = 1e-25; // Units of solar masses
+const PROTOMOON_MASS = 1e-15; // Units of solar masses
 
 // For Kothari Radius
 const A1_20 = 6.485e12;
@@ -60,6 +60,8 @@ var Astro = Object.create({
   // },
   //
   ecosphere: function(luminosity) {
+    // long double min_r_ecosphere = sqrt( (innermost_planet->sun)->luminosity / 1.51 );
+    // long double max_r_ecosphere = sqrt( (innermost_planet->sun)->luminosity / 0.48 );
     return Math.sqrt(luminosity);
   },
 
