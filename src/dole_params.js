@@ -123,17 +123,17 @@ var DoleParams = Object.create({
   },
 
   planetOuterDustLimit: function(planetaryMass) {
-    return this.scaleCubeRootMass(10, planetaryMass);
+    return this.scaleCubeRootMass(4, planetaryMass);
   },
 
   innermostMoon: function(planetaryMass) {
     // need to figure out what this is...
-    return this.scaleCubeRootMass(0.1, planetaryMass);
+    return this.scaleCubeRootMass(0.001, planetaryMass);
   },
 
   outermostMoon: function(planetaryMass) {
     // need to figure out what this is...
-    return this.scaleCubeRootMass(1, planetaryMass);
+    return this.scaleCubeRootMass(4, planetaryMass);
   },
 
 });

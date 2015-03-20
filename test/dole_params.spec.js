@@ -117,9 +117,9 @@ describe('DoleParams', function(){
     expect(round(result, 3)).to.equal(0.048);
   });
 
-  it('should calculate the planetDustLimit', function() {
-    var result = DoleParams.planetDustLimit(3);
-    expect(round(result, 3)).to.equal(0.144);
-  });
+  // it('should calculate the planetDustLimit', function() {
+  //   var result = DoleParams.planetDustLimit(3);
+  //   expect(round(result, 3)).to.equal(0.144);
+  // });
 
 });

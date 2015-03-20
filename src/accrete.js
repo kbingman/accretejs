@@ -121,7 +121,11 @@ Accrete.prototype = Object.create({
 
         dustBands.compressLanes();
 
-        if (!this.coalescePlanetismals(tismal, moonHead) && tismal.mass > Astro.protomoonMass) {
+        // add a decent test here
+        // && Math.pow(planetaryMass, 1/3) > Math.pow(tismal.mass, 1/3) > Astro.protomoonMass
+        var temp = this.coalescePlanetismals(tismal, moonHead);
+        // console.log(temp);
+        if (!temp && tismal.mass > Astro.protomoonMass) {
           // console.log('coalescePlanetismals');
           // console.log(tismal);
           moonHead = this.insertPlanet(tismal, moonHead);
