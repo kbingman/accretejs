@@ -1,7 +1,7 @@
 {
   "name": "Accrete.js",
   "version": "0.0.0",
-  "description": "Accrete.js is a port of the awesome planetary system simulation algorithm, [Accrete](http://www.rand.org/pubs/papers/P4226.html) to JavaScript. Originally published* and partly programmed (via FORTRAN) by the amazing Stephen H. Dole. Almost a decade later Carl Sagan and Richard Isaacson refined Dole's model -- which shortly thereafter was also implemented in FORTRAN, and again elaborately and academically published by Martin Fogg.",
+  "description": "Accretejs is a port of the awesome planetary system simulation algorithm, [Accrete](http://www.rand.org/pubs/papers/P4226.html) to JavaScript. Originally published* and partly programmed (via FORTRAN) by the amazing Stephen H. Dole. Almost a decade later Carl Sagan and Richard Isaacson refined Dole's model -- which shortly thereafter was also implemented in FORTRAN, and again elaborately and academically published by Martin Fogg.",
   "main": "index.js",
   "scripts": {
     "test": "mocha test --reporter spec"
@@ -11,18 +11,13 @@
     "url": "https://github.com/tmanderson/Accrete.js.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/tmanderson/Accrete.js/issues"
   },
   "homepage": "https://github.com/tmanderson/Accrete.js",
   "dependencies": {
     "alea": "0.0.9",
-    "browserify": "^6.3.2",
-    "vinyl-source-stream": "^1.0.0",
-    "chai": "^1.10.0",
-    "karma-browserifast": "^0.7.0",
-    "karma-chrome-launcher": "^0.1.5",
-    "karma-mocha": "^0.1.9"
+    "chai": "^1.10.0"
   }
 }
