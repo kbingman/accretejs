@@ -26,6 +26,7 @@ describe('Planetismal',function(){
 
       it('should return axis if given', function(){
         expect(planetismal.axis).to.equal(0.1);
+
       });
 
       it('should return mass if given', function(){
@@ -77,42 +78,6 @@ describe('Planetismal',function(){
 
       it('should return the mass in earth masses', function(){
         expect(planetismal.getEarthMass()).to.equal(0.038356198019601856);
-      });
-
-      it('should return the correct perihelionDistance', function(){
-        expect(planetismal.perihelionDistance()).to.equal(0.0999);
-      });
-
-      it('should return the correct aphelionDistance', function(){
-        expect(planetismal.aphelionDistance()).to.equal(0.0999);
-      });
-
-      it('should return the correct reducedMass', function(){
-        expect(planetismal.reducedMass()).to.equal(1.152614223763852e-7);
-      });
-
-      it('should return the correct reducedMargin', function(){
-        expect(planetismal.reducedMargin()).to.equal(0.01842557262658827);
-      });
-
-      it('should return the correct innerEffectLimit', function(){
-        expect(planetismal.innerEffectLimit()).to.equal(0.09805928529460384);
-      });
-
-      it('should return the correct outerEffectLimit', function(){
-        expect(planetismal.outerEffectLimit()).to.equal(0.10174071470539617);
-      });
-
-      it('should return the correct innerSweptLimit', function(){
-        expect(planetismal.innerSweptLimit()).to.equal(0.07844742823568307);
-      });
-
-      it('should return the correct outerSweptLimit', function(){
-        expect(planetismal.outerSweptLimit()).to.equal(0.13565428627386156);
-      });
-
-      it('should return the correct criticalMass', function(){
-        expect(planetismal.criticalMass(1)).to.equal(0.00006753161406712049);
       });
 
     });

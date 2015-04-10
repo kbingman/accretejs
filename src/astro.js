@@ -10,10 +10,12 @@ const CM_IN_AU = 1.495978707e13;
 const KM_IN_AU = 1.495978707e8;
 const DAYS_IN_YEAR = 365.256;
 const SECONDS_IN_HOUR = 3000;
+const GRAV_CONSTANT = 6.672E-8; /* units of dyne cm2/gram2 */
 
 const J = 1.46E-19; /* Used in day-length calcs = cm2/sec2 g; */
 
 const PROTOPLANET_MASS = 1e-25; // Units of solar masses
+const PROTOMOON_MASS = 1e-15; // Units of solar masses
 
 // For Kothari Radius
 const A1_20 = 6.485e12;
@@ -23,9 +25,10 @@ const JIMS_FUDGE = 1.004;
 
 const BREATHABILITY_PHASE = [ 'none', 'breathable', 'unbreathable', 'poisonous'];
 
-var Astro = Object.create({
+var Astro = {
 
   protoplanetMass: PROTOPLANET_MASS,
+  protomoonMass: PROTOMOON_MASS,
   solarMassInEarthMass: SOLAR_MASS_IN_EARTH_MASS,
   solarMassInGrams: EARTH_MASS_IN_GRAMS,
   daysInYear: DAYS_IN_YEAR,
@@ -44,15 +47,30 @@ var Astro = Object.create({
     return Math.pow(mass, n);
   },
 
-  ecoSphere: function(luminosity) {
+  // mainSequenceAge: function(stellarMass, stellarLuminosity) {
+  //   var age;
+  //   var mainSeqLife = 1.0e10 * (stellarMass / stellarLuminosity);
+  //
+  //   if ((mainSeqLife >= 6.0e9)) {
+  //     age = utils.randomNumber(1.0e9, 6.0e9);
+  //   }
+  //   else {
+  //     age = utils.randomNumber(1.0e9, mainSeqLife);
+  //   }
+  // },
+  //
+  ecosphere: function(luminosity) {
+    // long double min_ecosphereRadius = sqrt( (innermost_planet->sun)->luminosity / 1.51 );
+    // long double max_ecosphereRadius = sqrt( (innermost_planet->sun)->luminosity / 0.48 );
     return Math.sqrt(luminosity);
   },
 
   /**
-   *
+   * This function, given the orbital radius of a planet in AU, returns
+   * the orbital 'zone' of the particle.
    */
   orbitalZone: function(luminosity, orbRadius) {
-    if(orbRadius < 4 * Math.sqrt(luminosity)) {
+    if (orbRadius < 4 * Math.sqrt(luminosity)) {
       return 1;
     }
     else if (orbRadius < 15 * Math.sqrt(luminosity)) {
@@ -63,21 +81,23 @@ var Astro = Object.create({
     }
   },
 
-  volumeRadius: function(mass, density) {
-    var volume = 0;
-
-    mass = mass * SOLAR_MASS_IN_GRAMS;
-    volume = mass / density;
-
-    return Math.pow((3 * volume) / (4 * Math.PI), 1/3) / CM_IN_KM;
-  },
-
+  /**
+   * Returns the radius of the planet in kilometers.
+   * The mass passed in is in units of solar masses, the orbital radius
+   * in A.U.
+   * This formula is listed as eq.9 in Fogg's article, although some typos
+   * crop up in that eq. See "The Internal Constitution of Planets", by
+   * Dr. D. S. Kothari, Mon. Not. of the Royal Astronomical Society, vol 96
+   * pp.833-843, 1936 for the derivation. Specifically, this is Kothari's
+   * eq.23, which appears on page 840.
+   */
   kothariRadius: function(mass, giant, zone) {
     var atomicWeight, atomicNum, temp, temp1, temp2;
+    console.log('zone', zone);
 
-    switch(zone) {
+    switch (zone) {
       case 1:
-        if(giant) {
+        if (giant) {
           atomicWeight = 9.5;
           atomicNum = 4.5;
         }
@@ -89,7 +109,7 @@ var Astro = Object.create({
       break;
 
       case 2:
-        if(giant) {
+        if (giant) {
           atomicWeight = 2.47;
           atomicNum = 2;
         }
@@ -101,7 +121,7 @@ var Astro = Object.create({
       break;
 
       case 3:
-        if(giant) {
+        if (giant) {
           atomicWeight = 7;
           atomicNum = 4;
         }
@@ -127,20 +147,41 @@ var Astro = Object.create({
     return temp;
   },
 
-  empiricalDensity: function(mass, orbRadius, rEcosphere, gasGiant) {
-    var dens;
+  /**
+   * The mass passed in is in units of solar masses, and the orbital radius
+   * is in units of AU. The density is returned in units of grams/cc.
+   */
+  empiricalDensity: function(mass, orbRadius, ecosphereRadius, gasGiant) {
+    var density;
 
-    dens = Math.pow(mass * SOLAR_MASS_IN_GRAMS, 1/8);
-    dens = temp * Math.sqrt(Math.sqrt(rEcosphere, orbRadius));
+    density = Math.pow(mass * SOLAR_MASS_IN_GRAMS, 1/8);
+    density = density * Math.sqrt(Math.sqrt(ecosphereRadius, orbRadius));
 
     if (gasGiant) {
-      return dens * 1.2;
+      return density * 1.2;
     }
     else {
-      return dens * 5.5;
+      return density * 5.5;
     }
   },
 
+  /**
+   * The mass is in units of solar masses, and the density is in units
+   * of grams/cc. The radius returned is in units of km.
+   */
+  volumeRadius: function(mass, density) {
+    var volume = 0;
+
+    mass = mass * SOLAR_MASS_IN_GRAMS;
+    volume = mass / density;
+
+    return Math.pow((3 * volume) / (4 * Math.PI), 1/3) / CM_IN_KM;
+  },
+
+  /**
+   * The mass passed in is in units of solar masses, and the equatorial
+   * radius is in km. The density is returned in units of grams/cc.
+   */
   volumeDensity: function(mass, equatRadius) {
     var volume;
 
@@ -162,7 +203,17 @@ var Astro = Object.create({
     return periodInYears * this.daysInYear;
   },
 
-  dayLength: function(planet) {
+  /**
+   * Fogg's information for this routine came from Dole "Habitable Planets
+   * for Man", Blaisdell Publishing Company, NY, 1964. From this, he came
+   * up with his eq.12, which is the equation for the base_angular_velocity
+   * below. Going a bit further, he found an equation for the change in
+   * angular velocity per time (dw/dt) from P. Goldreich and S. Soter's paper
+   * "Q in the Solar System" in Icarus, vol 5, pp.375-389 (1966). Comparing
+   * to the change in angular velocity for the Earth, we can come up with an
+   * approximation for our new planet (his eq.13) and take that into account.
+   */
+  dayLength: function(planet, stellarMass, mainSequenceAge) {
     var planetMassInGrams = planet.mass * this.solarMassInGrams,
         equatorialRadiusInCm = planet.radius * CM_IN_KM,
         yearInHours = planet.orbPeriod || this.period(planet.axis, planet.mass, 1),
@@ -191,10 +242,10 @@ var Astro = Object.create({
       (planet.density / EARTH_DENSITY) *
       (equatorialRadiusInCm / EARTH_RADIUS_IN_CM) *
       (EARTH_MASS_IN_GRAMS / planetMassInGrams) *
-      Math.pow(planet.sun.mass, 2) *
+      Math.pow(stellarMasss, 2) *
       (1 / Math.pow(planet.axis, 6));
 
-    angVelocity = baseAngularVelocity + (changeInAngularVelocity * planet.sun.age);
+    angVelocity = baseAngularVelocity + (changeInAngularVelocity * mainSequenceAge);
 
     if (angVelocity <= 0.0) {
       stopped = true;
@@ -227,7 +278,7 @@ var Astro = Object.create({
    */
   escapeVel: function(mass, radius) {
     var massInGrams = mass * SOLAR_MASS_IN_GRAMS;
-    var radiusInCm = radius * CM_PER_KM;
+    var radiusInCm = radius * CM_IN_KM;
 
     return (Math.sqrt(2.0 * GRAV_CONSTANT * massInGrams / radiusInCm));
   },
@@ -247,7 +298,7 @@ var Astro = Object.create({
    * acceleration is returned in units of cm/sec2.
    */
   acceleration: function(mass, radius) {
-    return (GRAV_CONSTANT * (mass * SOLAR_MASS_IN_GRAMS) / Math.pow(radius * CM_PER_KM, 2.0));
+    return (GRAV_CONSTANT * (mass * SOLAR_MASS_IN_GRAMS) / Math.pow(radius * CM_IN_KM, 2.0));
   },
 
   /**
@@ -267,7 +318,7 @@ var Astro = Object.create({
   rmsVel: function(molecularWeight, orbitalRadius) {
     var exosphericTemp = EARTH_EXOSPHERE_TEMP / Math.pow(orbitalRadius, 2.0);
 
-    return (Math.sqrt((3.0 * MOLAR_GAS_CONST * exosphericTemp) / molecularWeight) * CM_PER_METER);
+    return Math.sqrt((3.0 * MOLAR_GAS_CONST * exosphericTemp) / molecularWeight) * CM_PER_METER;
   },
 
   /**
@@ -292,7 +343,7 @@ var Astro = Object.create({
    */
   pressure: function(volatileGasInventory, equatorialRadius, gravity) {
     equatorialRadius = EARTH_RADIUS_IN_KM / equatorialRadius;
-    return (volatileGasInventory * gravity / Math.pow(equatorialRadius, 2.0));
+    return volatileGasInventory * gravity / Math.pow(equatorialRadius, 2.0);
   },
 
   /**
@@ -304,6 +355,308 @@ var Astro = Object.create({
     return orbitalRadius < greenhouseRadius && zone == 1 && this.pressure > 0;
   },
 
-});
+  /**
+   * This implements Fogg's eq.17. The 'inventory' returned is unitless.
+   */
+  volInventory: function(mass, escape_vel, rms_vel, stellar_mass, zone, greenhouseEffect) {
+    var velocityRatio,
+        proportionConst,
+        temp1,
+        temp2,
+        massInEarthUnits;
+
+    velocityRatio = escape_vel / rms_vel;
+    if (velocityRatio < GAS_RETENTION_THRESHOLD) {
+      return 0.0;
+    }
+
+    switch (zone) {
+      case 1:
+        proportionConst = 100000.0;
+        break;
+      case 2:
+        proportionConst = 75000.0;
+        break;
+      case 3:
+        proportionConst = 250.0;
+        break;
+      default:
+        proportionConst = 10.0;
+        console.log('Error: orbital zone not initialized correctly!');
+        break;
+    }
+    massInEarthUnits = mass * EARTH_MASSES_PER_SOLAR_MASS;
+    temp1 = (proportionConst * massInEarthUnits) / stellar_mass;
+    temp2 = utils.about(temp1, 0.2);
+
+    if (greenhouseEffect){
+      return temp2;
+    } else {
+      return temp2 / 100.0;
+    }
+  },
+
+  /**
+   * This function returns the boiling point of water in an atmosphere of
+   * pressure 'surfacePressure', given in millibars. The boiling point is
+   * returned in units of Kelvin. This is Fogg's eq.21.
+   */
+  boilingPoint: function(surfacePressure) {
+    var surfacePressureInBars = surfacePressure / MILLIBARS_PER_BAR;
+
+    return (1.0 / (Math.log(surfacePressureInBars) / -5050.5 + 1.0 / 373.0));
+  },
+
+  /*
+   * This function is Fogg's eq.22. Given the volatile gas inventory and
+   * planetary radius of a planet (in Km), this function returns the
+   * fraction of the planet covered with water.
+   * I have changed the function very slightly: the fraction of Earth's
+   * surface covered by water is 71%, not 75% as Fogg used.
+   */
+  hydrosphereFraction: function(volatileGasInventory, planetaryRadius) {
+    var hydrosphereFraction = (0.71 * volatileGasInventory / 1000.0) *
+      Math.pow(EARTH_RADIUS_IN_KM / planetaryRadius, 2.0);
+
+    if (hydrosphereFraction >= 1.0) {
+      return 1.0;
+    } else {
+      return hydrosphereFraction;
+    }
+  },
+
+  /**
+   * The temperature calculated is in degrees Kelvin.
+   * Quantities already known which are used in these calculations:
+   * planet->moleculeWeight
+   * planet->surfacePressure
+   * R_ecosphere
+   * planet->a
+   * planet->volatileGasInventory
+   * planet->radius
+   * planet->boil_point
+   */
+  iterateSurfaceTemp: function(planet, ecosphereRadius) {
+    var albedo = 0.0,
+        water = 0.0,
+        clouds = 0.0,
+        ice = 0.0;
+
+    var opticalDepth = this.opacity(planet.moleculeWeight, planet.surfacePressure);
+    var effectiveTemp = this.effTemp(ecosphereRadius, planet.a, EARTH_ALBEDO);
+    var greenhouseRise = this.greenRise(opticalDepth, effectiveTemp, planet.surfacePressure);
+    var surfaceTemp = effectiveTemp + greenhouseRise;
+    var previousTemp = surfaceTemp - 5.0;
+
+    while (Math.abs(surfaceTemp - previousTemp) > 1.0) {
+        previousTemp = surfaceTemp;
+        water = this.hydrosphereFraction(planet.volatileGasInventory, planet.radius);
+        clouds = this.cloudFraction(surfaceTemp, planet.moleculeWeight, planet.radius, water);
+        ice = this.iceFraction(water, surfaceTemp);
+        if (surfaceTemp >= planet.boilPoint || surfaceTemp <= FREEZING_POINT_OF_WATER){
+            water = 0.0;
+        }
+        albedo = this.planetAlbedo(water, clouds, ice, planet.surfacePressure);
+        opticalDepth = this.opacity(planet.moleculeWeight, planet.surfacePressure);
+        effectiveTemp = this.effTemp(ecosphereRadius, planet.a, albedo);
+        greenhouseRise = this.greenRise(opticalDepth, effectiveTemp, planet.surfacePressure);
+        surfaceTemp = effectiveTemp + greenhouseRise;
+    }
+    // planet.hydrosphere = water;
+    // planet.cloud_cover = clouds;
+    // planet.ice_cover = ice;
+    // planet.albedo = albedo;
+    // planet.surfaceTemp = surfaceTemp;
+    return surfaceTemp
+  },
+
+  /**
+   * This function returns the dimensionless quantity of optical depth,
+   * which is useful in determining the amount of greenhouse effect on a
+   * planet.
+   */
+  opacity: function(molecularWeight, surfacePressure) {
+    var opticalDepth = 0.0;
+
+    if (molecularWeight >= 0.0 && molecularWeight < 10.0) {
+      opticalDepth += 3.0;
+    }
+    if (molecularWeight >= 10.0 && molecularWeight < 20.0) {
+      opticalDepth += 2.34;
+    }
+    if (molecularWeight >= 20.0 && molecularWeight < 30.0) {
+      opticalDepth += 1.0;
+    }
+    if (molecularWeight >= 30.0 && molecularWeight < 45.0) {
+      opticalDepth += 0.15;
+    }
+    if (molecularWeight >= 45.0 && molecularWeight < 100.0) {
+      opticalDepth += 0.05;
+    }
+
+    if (surfacePressure >= 70.0 * EARTH_SURF_PRES_IN_MILLIBARS) {
+      opticalDepth = opticalDepth * 8.333;
+    } else if (surfacePressure >= 50.0 * EARTH_SURF_PRES_IN_MILLIBARS) {
+      opticalDepth = opticalDepth * 6.666;
+    } else if (surfacePressure >= 30.0 * EARTH_SURF_PRES_IN_MILLIBARS) {
+      opticalDepth = opticalDepth * 3.333;
+    } else if (surfacePressure >= 10.0 * EARTH_SURF_PRES_IN_MILLIBARS) {
+      opticalDepth = opticalDepth * 2.0;
+    } else if (surfacePressure >= 5.0 * EARTH_SURF_PRES_IN_MILLIBARS) {
+      opticalDepth = opticalDepth * 1.5;
+    }
+
+    return opticalDepth;
+ },
+
+  /**
+   * This is Fogg's eq.20, and is also Hart's eq.20 in his "Evolution of
+   * Earth's Atmosphere" article. The effective temperature given is in
+   * units of Kelvin, as is the rise in temperature produced by the
+   * greenhouse effect, which is returned.\
+   */
+  greenRise: function(opticalDepth, effectiveTemp, surfacePressure) {
+    var convectionFactor = EARTH_CONVECTION_FACTOR *
+      Math.pow((surfacePressure / EARTH_SURF_PRES_IN_MILLIBARS), 0.25);
+
+    return (Math.pow((1.0 + 0.75 * opticalDepth), 0.25) - 1.0) *
+      effectiveTemp * convectionFactor;
+  },
+
+  /**
+   * Given the surface temperature of a planet (in Kelvin), this function
+   * returns the fraction of cloud cover available. This is Fogg's eq.23.
+   * See Hart in "Icarus" (vol 33, pp23 - 39, 1978) for an explanation.
+   * This equation is Hart's eq.3.
+   * I have modified it slightly using constants and relationships from
+   * Glass's book "Introduction to Planetary Geology", p.46.
+   * The 'CLOUD_COVERAGE_FACTOR' is the amount of surface area on Earth
+   * covered by one Kg. of cloud.
+   */
+  cloudFraction: function(surfaceTemp, smallestMWRetained, equatorialRadius, hydrosphereFraction) {
+    var waterVaporInKG,
+        fraction,
+        surfaceArea,
+        hydrosphereMass;
+
+    if (smallestMWRetained > WATER_VAPOR) {
+      return 0.0;
+    }
+
+    surfaceArea = 4.0 * PI * Math.pow(equatorialRadius, 2.0);
+    hydrosphereMass = hydrosphereFraction * surfaceArea * EARTH_WATER_MASS_PER_AREA;
+    waterVaporInKG = (0.00000001 * hydrosphereMass) * Math.exp(Q2_36 * (surfaceTemp - 288.0));
+    fraction = CLOUD_COVERAGE_FACTOR * waterVaporInKG / surfaceArea;
+
+    if (fraction >= 1.0) {
+      fraction = 1.0;
+    }
+
+    return fraction;
+  },
+
+  /**
+   * The surface temperature passed in is in units of Kelvin.
+   * The cloud adjustment is the fraction of cloud cover obscuring each
+   * of the three major components of albedo that lie below the clouds.
+   */
+  planetAlbedo: function(waterFraction, cloudFraction, iceFraction, surfacePressure) {
+    var rockFraction,
+        cloudAdjustment,
+        components,
+        cloudContribution,
+        rockContribution,
+        waterContribution,
+        iceContribution;
+
+    rockFraction = 1.0 - waterFraction - iceFraction;
+    components = 0.0;
+
+    if (waterFraction > 0) {
+      components = components + 1.0;
+    }
+    if (iceFraction > 0) {
+      components = components + 1.0;
+    }
+    if (rockFraction > 0) {
+      components = components + 1.0;
+    }
+
+    cloudAdjustment = cloudFraction / components;
+
+    if (rockFraction >= cloudAdjustment) {
+      rockFraction = rockFraction - cloudAdjustment;
+    } else {
+      rockFraction = 0;
+    }
+
+    if (waterFraction > cloudAdjustment) {
+      waterFraction = waterFraction - cloudAdjustment;
+    } else {
+      waterFraction = 0;
+    }
+
+    if (iceFraction > cloudAdjustment) {
+      iceFraction = iceFraction - cloudAdjustment;
+    } else {
+      iceFraction = 0;
+    }
+
+    cloudContribution = cloudFraction * utils.about(CLOUD_ALBEDO, 0.2);
+
+    if (surfacePressure === 0) {
+      rockContribution = rockFraction * utils.about(AIRLESS_ROCKY_ALBEDO, 0.3);
+    } else {
+      rockContribution = rockFraction * utils.about(ROCKY_ALBEDO, 0.1);
+    }
+
+    waterContribution = waterFraction * utils.about(WATER_ALBEDO, 0.2);
+
+    if (surfacePressure === 0) {
+      iceContribution = iceFraction * utils.about(AIRLESS_ICE_ALBEDO, 0.4);
+    } else {
+      iceContribution = iceFraction * utils.about(ICE_ALBEDO, 0.1);
+    }
+
+    return cloudContribution + rockContribution + waterContribution + iceContribution;
+  },
+
+  /**
+   * This is Fogg's eq.19. The ecosphere radius is given in AU, the orbital
+   * radius in AU, and the temperature returned is in Kelvin.
+   */
+  effTemp: function(ecosphereRadius, orbitalRadius, albedo) {
+    return (Math.sqrt(ecosphereRadius / orbitalRadius) *
+      Math.pow((1.0 - albedo) / 0.7, 0.25) * EARTH_EFFECTIVE_TEMP);
+  },
+
+  /**
+   * Given the surface temperature of a planet (in Kelvin), this function
+   * returns the fraction of the planet's surface covered by ice. This is
+   * Fogg's eq.24. See Hart[24] in Icarus vol.33, p.28 for an explanation.
+   * I have changed a constant from 70 to 90 in order to bring it more in
+   * line with the fraction of the Earth's surface covered with ice, which
+   * is approximatly .016 (=1.6%).
+   */
+  iceFraction: function(hydrosphereFraction, surfaceTemp) {
+    var temp;
+
+    if (surfaceTemp > 328.0) {
+      surfaceTemp = 328.0;
+    }
+
+    temp = Math.pow(((328.0 - surfaceTemp) / 90.0), 5.0);
+
+    if (temp > 1.5 * hydrosphereFraction) {
+      temp = 1.5 * hydrosphereFraction;
+    }
+    if (temp >= 1.0) {
+      return 1.0;
+    } else {
+      return temp;
+    }
+  }
+
+};
 
 module.exports = Astro;

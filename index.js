@@ -3,11 +3,11 @@ var Accrete = require('./src/accrete.js');
 var seed = 2000;
 
 var start = +new Date();
-var gen = new Accrete();
-var sys = gen.distributePlanets(1);
+var gen = new Accrete('hello42');
+var sys = gen.distributePlanets(1.2);
 
 console.log(+new Date() - start);
-console.log(sys.length);
+console.log(sys.planets.length);
 
 sys.planets.forEach(function(planet, i) {
   console.log(planet.axis, planet.mass, planet.gasGiant);
