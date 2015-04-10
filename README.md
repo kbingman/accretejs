@@ -21,16 +21,18 @@ Check out, add to, and keep an eye on the render directory for different visuali
 For now, just use accrete.js, which includes each module concatenated in order. Include that script in any environment and the following will output your basic planet data for a system similar to our own:
 
 ```
-var gen 	= new Accrete();
-	system 	= gen.distributePlanets();
+var gen = new Accrete();
+var system = gen.distributePlanets();
 
-for(var i = 0; i < system.length; i++) system[i].print();
+for(var i = 0; i < system.length; i++) {
+  system[i].print();
+}
 ```
 
 ### Testing
 In order to run the tests, you will need node.js, npm and mocha installed. Then you can run
 ```
-	npm install
+  npm install
 
 ```
 
