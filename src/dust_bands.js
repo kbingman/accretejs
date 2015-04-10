@@ -28,19 +28,16 @@ var DustBands = function(inner, outer) {
     dustHead: dustHead,
 
     dustAvailable: function(inside, outside) {
-      var dustHere = false;
-
-      if(!this.dustHead) {
+      if (!this.dustHead) {
         return false;
       }
 
-      this.bands.forEach(function(band) {
+      return this.bands.reduce(function(memo, band) {
         if (band && band.inner < outside) {
-          dustHere = band.dust;
+          memo = band.dust;
         }
-      });
-
-      return dustHere;
+        return memo;
+      }, false);
     },
 
     updateLanes: function(min, max, usedGas) {
@@ -59,7 +56,7 @@ var DustBands = function(inner, outer) {
 
           next = second;
         }
-        else if(band.inner < max && band.outer > max) {
+        else if (band.inner < max && band.outer > max) {
           first = addBand(max, band.outer, band.dust, band.gas, i);
 
           band.outer = max;
@@ -67,18 +64,18 @@ var DustBands = function(inner, outer) {
           band.gas = newGas;
           next = first;
         }
-        else if(band.inner < min && band.outer > min) {
+        else if (band.inner < min && band.outer > min) {
           first = addBand(min, band.outer, false, newGas, i);
 
           band.outer = min;
           next = first;
         }
-        else if(band.inner >= min && band.outer <= max) {
+        else if (band.inner >= min && band.outer <= max) {
           band.dust = false;
           band.gas = newGas;
           next = band;
         }
-        else if(band.inner > max || band.outer < min) {
+        else if (band.inner > max || band.outer < min) {
           next = band;
         }
 
@@ -86,15 +83,12 @@ var DustBands = function(inner, outer) {
     },
 
     dustRemaining: function(innerBound, outerBound) {
-      var dustLeft = false;
-
-      this.bands.forEach(function(band, i) {
+      return this.bands.reduce(function(memo, band, i) {
         if (band.dust && band.outer >= innerBound && band.inner <= outerBound) {
-          dustLeft = true;
+          memo = true;
         }
-      });
-
-      return dustLeft;
+        return memo;
+      }, false);
     },
 
     compressLanes: function() {

@@ -1,4 +1,4 @@
-var DoleParams = Object.create({
+var DoleParams = {
 
   B: 1.2e-5, // For critical mass
   K: 50, // Dust/gas ratio
@@ -134,8 +134,8 @@ var DoleParams = Object.create({
   outermostMoon: function(planetaryMass) {
     // need to figure out what this is...
     return this.scaleCubeRootMass(4, planetaryMass);
-  },
+  }
 
-});
+};
 
 module.exports = DoleParams;

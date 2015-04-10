@@ -79,15 +79,7 @@ Accrete.prototype = Object.create({
    * planetary system as distribute_planetary_masses
    * does to the whole solar system.
    */
-  // distributeMoonMasses: function(planet){
-  //   // {
-  //   //   planetaryMass
-  //   //   planetEccentricity
-  //   //   stellarLuminosityRatio
-  //   //   outerDust
-  //   //   innerDust
-  //   // }
-  //
+
   distributeMoons: function(planetaryMass, stellarLuminosity) {
 
     var moonHead = null;
@@ -211,7 +203,7 @@ Accrete.prototype = Object.create({
           dist1 = null,
           dist2 = null;
 
-      if(dist > 0) {
+      if (dist > 0) {
         dist1 = DoleParams.outerEffectLimit(planetismal) - planetismal.axis;
         dist2 = curr.axis - DoleParams.innerEffectLimit(curr);
       }

@@ -115,39 +115,39 @@ describe('Accrete', function(){
       // console.log('Planets');
       system.planets.forEach(function(planet, i) {
         var moons = accrete.distributeMoons(planet.mass, 1);
-        console.log('Planet', i, ':', planet.getEarthMass());
-        console.log('Moons:', moons.length);
+        // console.log('Planet', i, ':', planet.getEarthMass());
+        // console.log('Moons:', moons.length);
         moons.forEach(function(moon) {
-          console.log(moon.getEarthMass());
+          // console.log(moon.getEarthMass());
         });
       });
 
-      system2.planets.forEach(function(planet, i) {
-        var moons = accrete.distributeMoons(planet.mass, 1);
-        console.log('Planet', i, ':', planet.getEarthMass());
-        console.log('Moons:', moons.length);
-        moons.forEach(function(moon) {
-          console.log(moon.getEarthMass());
-        });
-      });
-
-      system3.planets.forEach(function(planet, i) {
-        var moons = accrete.distributeMoons(planet.mass, 1);
-        console.log('Planet', i, ':', planet.getEarthMass());
-        console.log('Moons:', moons.length);
-        moons.forEach(function(moon) {
-          console.log(moon.getEarthMass());
-        });
-      });
-
-      system4.planets.forEach(function(planet, i) {
-        var moons = accrete.distributeMoons(planet.mass, 1);
-        console.log('Planet', i, ':', planet.getEarthMass());
-        console.log('Moons:', moons.length);
-        moons.forEach(function(moon) {
-          console.log(moon.getEarthMass());
-        });
-      });
+      // system2.planets.forEach(function(planet, i) {
+      //   var moons = accrete.distributeMoons(planet.mass, 1);
+      //   console.log('Planet', i, ':', planet.getEarthMass());
+      //   console.log('Moons:', moons.length);
+      //   moons.forEach(function(moon) {
+      //     console.log(moon.getEarthMass());
+      //   });
+      // });
+      //
+      // system3.planets.forEach(function(planet, i) {
+      //   var moons = accrete.distributeMoons(planet.mass, 1);
+      //   console.log('Planet', i, ':', planet.getEarthMass());
+      //   console.log('Moons:', moons.length);
+      //   moons.forEach(function(moon) {
+      //     console.log(moon.getEarthMass());
+      //   });
+      // });
+      //
+      // system4.planets.forEach(function(planet, i) {
+      //   var moons = accrete.distributeMoons(planet.mass, 1);
+      //   console.log('Planet', i, ':', planet.getEarthMass());
+      //   console.log('Moons:', moons.length);
+      //   moons.forEach(function(moon) {
+      //     console.log(moon.getEarthMass());
+      //   });
+      // });
 
     });
   });
