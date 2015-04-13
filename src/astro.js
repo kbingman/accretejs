@@ -1,25 +1,32 @@
 const SOLAR_MASS_IN_GRAMS = 1.989e33;
 const EARTH_MASS_IN_GRAMS = 5.977e27;
 const SOLAR_MASS_IN_EARTH_MASS = 332775.64;
+const EARTH_MASSES_PER_SOLAR_MASS = 332775.64;
 const EARTH_RADIUS_IN_CM = 6.378e6;
 const EARTH_RADIUS_IN_KM = 6378;
 const EARTH_DENSITY = 5.52;
 const EARTH_AXIAL_TILT = 23.4; /* Units of degrees */
+const EARTH_ACCELERATION = 981.0;
 const CM_IN_KM = 1.0e5;
 const CM_IN_AU = 1.495978707e13;
 const KM_IN_AU = 1.495978707e8;
 const DAYS_IN_YEAR = 365.256;
 const SECONDS_IN_HOUR = 3000;
-const GRAV_CONSTANT = 6.672E-8; /* units of dyne cm2/gram2 */
+const GRAV_CONSTANT = 6.672e-8; /* units of dyne cm2/gram2 */
+const RADIANS_PER_ROTATION = 2.0 * Math.PI;
 
-const J = 1.46E-19; /* Used in day-length calcs = cm2/sec2 g; */
+const SECONDS_PER_HOUR = 3600.0;
+
+const GREENHOUSE_EFFECT_CONST = 0.93; /* affects inner radius.. */
+
+const J = 1.46e-19; /* Used in day-length calcs = cm2/sec2 g; */
 
 const PROTOPLANET_MASS = 1e-25; // Units of solar masses
 const PROTOMOON_MASS = 1e-15; // Units of solar masses
 
 // For Kothari Radius
 const A1_20 = 6.485e12;
-const A2_20 = 4.0032e12;
+const A2_20 = 4.0032e-8;
 const BETA_20 = 5.71e12;
 const JIMS_FUDGE = 1.004;
 
@@ -47,18 +54,19 @@ var Astro = {
     return Math.pow(mass, n);
   },
 
-  // mainSequenceAge: function(stellarMass, stellarLuminosity) {
-  //   var age;
-  //   var mainSeqLife = 1.0e10 * (stellarMass / stellarLuminosity);
-  //
-  //   if ((mainSeqLife >= 6.0e9)) {
-  //     age = utils.randomNumber(1.0e9, 6.0e9);
-  //   }
-  //   else {
-  //     age = utils.randomNumber(1.0e9, mainSeqLife);
-  //   }
-  // },
-  //
+  mainSequenceAge: function(stellarMass, stellarLuminosity) {
+    var age;
+    var mainSeqLife = 1.0e10 * (stellarMass / stellarLuminosity);
+
+    // if ((mainSeqLife >= 6.0e9)) {
+    //   age = utils.randomNumber(1.0e9, 6.0e9);
+    // }
+    // else {
+    //   age = utils.randomNumber(1.0e9, mainSeqLife);
+    // }
+    return mainSeqLife;
+  },
+
   ecosphere: function(luminosity) {
     // long double min_ecosphereRadius = sqrt( (innermost_planet->sun)->luminosity / 1.51 );
     // long double max_ecosphereRadius = sqrt( (innermost_planet->sun)->luminosity / 0.48 );
@@ -83,8 +91,7 @@ var Astro = {
 
   /**
    * Returns the radius of the planet in kilometers.
-   * The mass passed in is in units of solar masses, the orbital radius
-   * in A.U.
+   * The mass passed in is in units of solar masses, the orbital radius in A.U.
    * This formula is listed as eq.9 in Fogg's article, although some typos
    * crop up in that eq. See "The Internal Constitution of Planets", by
    * Dr. D. S. Kothari, Mon. Not. of the Royal Astronomical Society, vol 96
@@ -93,7 +100,6 @@ var Astro = {
    */
   kothariRadius: function(mass, giant, zone) {
     var atomicWeight, atomicNum, temp, temp1, temp2;
-    console.log('zone', zone);
 
     switch (zone) {
       case 1:
@@ -131,17 +137,16 @@ var Astro = {
         }
     }
 
-    temp1 = atomicWeight * atomicNum;
-
-    temp = (2 * BETA_20 * Math.pow(SOLAR_MASS_IN_GRAMS, 1/3)) / (A1_20 * Math.pow(temp1, 1/3));
+    temp = atomicWeight * atomicNum;
+    temp = (2 * BETA_20 * Math.pow(SOLAR_MASS_IN_GRAMS, 1/3)) / (A1_20 * Math.pow(temp, 1/3));
 
     temp2 = A2_20 * Math.pow(atomicWeight, 4/3) * Math.pow(SOLAR_MASS_IN_GRAMS, 2/3);
     temp2 = temp2 * Math.pow(mass, 2/3);
     temp2 = temp2 / (A1_20 * Math.pow(atomicNum, 2));
+    temp2 += 1.0;
 
     temp = temp / temp2;
     temp = (temp * Math.pow(mass, 1/3)) / CM_IN_KM;
-
     temp /= JIMS_FUDGE;
 
     return temp;
@@ -154,14 +159,14 @@ var Astro = {
   empiricalDensity: function(mass, orbRadius, ecosphereRadius, gasGiant) {
     var density;
 
-    density = Math.pow(mass * SOLAR_MASS_IN_GRAMS, 1/8);
-    density = density * Math.sqrt(Math.sqrt(ecosphereRadius, orbRadius));
+    density = Math.pow(mass * SOLAR_MASS_IN_EARTH_MASS, (1.0 / 8.0));
+    density = density * Math.pow(ecosphereRadius / orbRadius, (1.0 / 4.0));
 
     if (gasGiant) {
-      return density * 1.2;
+      return (density * 1.2);
     }
     else {
-      return density * 5.5;
+      return (density * 5.5);
     }
   },
 
@@ -185,7 +190,7 @@ var Astro = {
   volumeDensity: function(mass, equatRadius) {
     var volume;
 
-    mass = mass * this.solarMassInGrams;
+    mass = mass * SOLAR_MASS_IN_GRAMS;
     equatRadius = equatRadius * CM_IN_KM;
 
     volume = (4 * Math.PI * Math.pow(equatRadius, 3)) / 3;
@@ -213,62 +218,99 @@ var Astro = {
    * to the change in angular velocity for the Earth, we can come up with an
    * approximation for our new planet (his eq.13) and take that into account.
    */
-  dayLength: function(planet, stellarMass, mainSequenceAge) {
-    var planetMassInGrams = planet.mass * this.solarMassInGrams,
-        equatorialRadiusInCm = planet.radius * CM_IN_KM,
-        yearInHours = planet.orbPeriod || this.period(planet.axis, planet.mass, 1),
-        giant = planet.giant || false,
-        k2 = 0,
-        baseAngularVelocity = 0,
-        changeInAngularVelocity = 0,
-        angVelocity = 0,
-        spinResonanceFactor = 0,
-        dayInHours = 0,
-        stopped = false;
+  dayLength: function(mass, radius, orbital_period, eccentricity, giant, age) {
+    var base_angular_velocity, planetary_mass_in_grams, k2, temp, equatorial_radius_in_cm, change_in_angular_velocity, spin_resonance_period;
 
-    planet.resonantPeriod = false;
+    spin_resonance = false;
+    if (giant)
+    k2 = 0.24;
+    else
+    k2 = 0.33;
+    planetary_mass_in_grams = mass * SOLAR_MASS_IN_GRAMS;
+    equatorial_radius_in_cm = radius * CM_IN_KM;
+    base_angular_velocity = Math.sqrt(2.0 * J * (planetary_mass_in_grams) / (k2 * Math.pow(equatorial_radius_in_cm, 2.0)));
+    /* This next term describes how much a planet's rotation is slowed by */
+    /* it's moons. Find out what dw/dt is after figuring out Goldreich and */
+    /* Soter's Q'. */
+    change_in_angular_velocity = 0.0;
+    temp = base_angular_velocity + (change_in_angular_velocity * age);
+    console.log(base_angular_velocity)
+    /* 'temp' is now the angular velocity. Now we change from rad/sec to */
+    /* hours/rotation. */
+    temp = 1.0 / ((temp / RADIANS_PER_ROTATION) * SECONDS_PER_HOUR);
+    if (temp >= orbital_period) {
+      spin_resonance_period = ((1.0 - eccentricity) / (1.0 + eccentricity)) * orbital_period;
 
-    if (giant) {
-      k2 = 0.24;
-    }
-    else {
-      k2 = 0.33;
-    }
+      console.log(temp);
+      // printf("...maybe: %f\n", spin_resonance_period);
 
-    baseAngularVelocity = Math.sqrt(2 * J * planetMassInGrams) /
-      (k2 * Math.pow(equatorialRadiusInCm, 2));
-
-    changeInAngularVelocity = this.changeInEarthAngVel *
-      (planet.density / EARTH_DENSITY) *
-      (equatorialRadiusInCm / EARTH_RADIUS_IN_CM) *
-      (EARTH_MASS_IN_GRAMS / planetMassInGrams) *
-      Math.pow(stellarMasss, 2) *
-      (1 / Math.pow(planet.axis, 6));
-
-    angVelocity = baseAngularVelocity + (changeInAngularVelocity * mainSequenceAge);
-
-    if (angVelocity <= 0.0) {
-      stopped = true;
-      dayInHours = this.veryLargeNumber;
-    }
-    else {
-      dayInHours = this.radiansPerRotation / (secondsPerHour * angVelocity);
-    }
-
-    if (dayInHours >= yearInHours || stopped) {
-      if (planet.eccn > 0.1) {
-        spinResonanceFactor = (1 - planet.eccn) / (1 + planet.eccn);
-        planet.resonantPeriod = true;
-
-        return spinResonanceFactor * yearInHours;
+      if (eccentricity > 0.01) {
+          temp = spin_resonance_period;
+          spin_resonance = true;
+      } else {
+          temp = orbital_period;
       }
-      else {
-        return yearInHours;
-      }
-    }
 
-    return dayInHours;
+    }
+    return temp;
   },
+
+  // dayLength: function(planet, stellarMass, mainSequenceAge) {
+  //   var planetMassInGrams = planet.mass * this.solarMassInGrams,
+  //       equatorialRadiusInCm = planet.radius * CM_IN_KM,
+  //       yearInHours = planet.orbPeriod || this.period(planet.axis, planet.mass, 1),
+  //       giant = planet.giant || false,
+  //       k2 = 0,
+  //       baseAngularVelocity = 0,
+  //       changeInAngularVelocity = 0,
+  //       angVelocity = 0,
+  //       spinResonanceFactor = 0,
+  //       dayInHours = 0,
+  //       stopped = false;
+  //
+  //   planet.resonantPeriod = false;
+  //
+  //   if (giant) {
+  //     k2 = 0.24;
+  //   }
+  //   else {
+  //     k2 = 0.33;
+  //   }
+  //
+  //   baseAngularVelocity = Math.sqrt(2 * J * planetMassInGrams) /
+  //     (k2 * Math.pow(equatorialRadiusInCm, 2));
+  //
+  //   changeInAngularVelocity = this.changeInEarthAngVel *
+  //     (planet.density / EARTH_DENSITY) *
+  //     (equatorialRadiusInCm / EARTH_RADIUS_IN_CM) *
+  //     (EARTH_MASS_IN_GRAMS / planetMassInGrams) *
+  //     Math.pow(stellarMasss, 2) *
+  //     (1 / Math.pow(planet.axis, 6));
+  //
+  //   angVelocity = baseAngularVelocity + (changeInAngularVelocity * mainSequenceAge);
+  //
+  //   if (angVelocity <= 0.0) {
+  //     stopped = true;
+  //     dayInHours = this.veryLargeNumber;
+  //   }
+  //   else {
+  //     dayInHours = this.radiansPerRotation / (secondsPerHour * angVelocity);
+  //   }
+  //
+  //   if (dayInHours >= yearInHours || stopped) {
+  //     if (planet.eccn > 0.1) {
+  //       spinResonanceFactor = (1 - planet.eccn) / (1 + planet.eccn);
+  //       planet.resonantPeriod = true;
+  //
+  //       return spinResonanceFactor * yearInHours;
+  //     }
+  //     else {
+  //       return yearInHours;
+  //     }
+  //   }
+  //
+  //   return dayInHours;
+  // },
 
   /**
    * This function implements the escape velocity calculation. Note that
@@ -351,21 +393,22 @@ var Astro = {
    * to R_inner, 99% of it's volatiles are assumed to have been deposited in
    * surface reservoirs (otherwise, it suffers from the greenhouse effect).
    */
-  greenhouse: function(zone, orbitalRadius, greenhouseRadius) {
+  greenhouse: function(zone, orbitalRadius, ecosphereRadius) {
+    var greenhouseRadius = ecosphereRadius * GREENHOUSE_EFFECT_CONST;
     return orbitalRadius < greenhouseRadius && zone == 1 && this.pressure > 0;
   },
 
   /**
    * This implements Fogg's eq.17. The 'inventory' returned is unitless.
    */
-  volInventory: function(mass, escape_vel, rms_vel, stellar_mass, zone, greenhouseEffect) {
+  volInventory: function(mass, escapeVel, rmsVel, stellarMass, zone, greenhouseEffect) {
     var velocityRatio,
         proportionConst,
         temp1,
         temp2,
         massInEarthUnits;
 
-    velocityRatio = escape_vel / rms_vel;
+    velocityRatio = escapeVel / rmsVel;
     if (velocityRatio < GAS_RETENTION_THRESHOLD) {
       return 0.0;
     }
@@ -386,7 +429,7 @@ var Astro = {
         break;
     }
     massInEarthUnits = mass * EARTH_MASSES_PER_SOLAR_MASS;
-    temp1 = (proportionConst * massInEarthUnits) / stellar_mass;
+    temp1 = (proportionConst * massInEarthUnits) / stellarMass;
     temp2 = utils.about(temp1, 0.2);
 
     if (greenhouseEffect){
@@ -513,14 +556,13 @@ var Astro = {
    * This is Fogg's eq.20, and is also Hart's eq.20 in his "Evolution of
    * Earth's Atmosphere" article. The effective temperature given is in
    * units of Kelvin, as is the rise in temperature produced by the
-   * greenhouse effect, which is returned.\
+   * greenhouse effect, which is returned.
    */
   greenRise: function(opticalDepth, effectiveTemp, surfacePressure) {
     var convectionFactor = EARTH_CONVECTION_FACTOR *
       Math.pow((surfacePressure / EARTH_SURF_PRES_IN_MILLIBARS), 0.25);
 
-    return (Math.pow((1.0 + 0.75 * opticalDepth), 0.25) - 1.0) *
-      effectiveTemp * convectionFactor;
+    return (Math.pow((1.0 + 0.75 * opticalDepth), 0.25) - 1.0) * effectiveTemp * convectionFactor;
   },
 
   /**

@@ -4,7 +4,7 @@
   "description": "Accretejs is a port of the awesome planetary system simulation algorithm, [Accrete](http://www.rand.org/pubs/papers/P4226.html) to JavaScript. Originally published* and partly programmed (via FORTRAN) by the amazing Stephen H. Dole. Almost a decade later Carl Sagan and Richard Isaacson refined Dole's model -- which shortly thereafter was also implemented in FORTRAN, and again elaborately and academically published by Martin Fogg.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test --reporter spec"
+    "test": "mocha test --reporter spec --grep Astro"
   },
   "repository": {
     "type": "git",
